@@ -56,15 +56,9 @@ def plot(p):
     plt.plot(p, ypos, "o")
     plt.grid()
     plt.show()
-    
-plot(Initial_position(10))
 ```
 
-
-    
-![png](output_7_0.png)
-    
-
+![图片描述](image_folder/particles_motion_simulation(1D)_01.png)
 
 ## 2.2 Interaction forces between particles
 
@@ -161,14 +155,14 @@ Here, we can string all the functions together in one main function and output t
 
 def simulate(n, time_step, show_plot=True):
     p = Initial_position(n)
-    update_plot(p)
+#    update_plot(p)
     print("P(0): ", p)
     for i in range(time_step):
         total_force = combined_force(p)
         x_det = displacement(total_force, delta_t=0.1)
         p = update_position(p, x_det)
         xpos = p
-    update_plot(xpos)
+#    update_plot(xpos)
     print("P({}): ".format(time_step), p)
     
 def update_plot(xpos):
@@ -183,23 +177,14 @@ def update_plot(xpos):
 simulate(10, 200, show_plot=True)
 ```
 
-
-    
-![png](output_17_0.png)
-    
-
-
     P(0):  [0.31846480408982525, 1.2837236942357588, 2.824261461537926, 3.483892327332404, 4.407622204637107, 4.586067093870614, 6.64318734454616, 8.7786790373901, 8.797493185344203, 9.617911699198027]
-    
-
-
-    
-![png](output_17_2.png)
-    
-
-
     P(200):  [0, 0.8323336708020489, 2.0255416770286656, 3.218261744643321, 4.410384072228611, 5.6018714552085385, 6.792755020641937, 7.9831217163839945, 9.173098542987779, 10]
     
+
+P(0):
+![图片描述](image_folder/particles_motion_simulation(1D)_02.png)
+P(200):
+![图片描述](image_folder/particles_motion_simulation(1D)_03.png)
 
 We can see that after 1000 time steps the particles tend to stabilise and are regularly distributed on the x-axis.
 
