@@ -183,6 +183,7 @@ simulate(10, 200, show_plot=True)
 
 P(0):
 ![图片描述](image_folder/particles_motion_simulation(1D)_02.png)
+
 P(200):
 ![图片描述](image_folder/particles_motion_simulation(1D)_03.png)
 
