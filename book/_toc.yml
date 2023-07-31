@@ -1,0 +1,12 @@
+format: jb-book
+root: opening
+options:
+  numbered: true
+chapters:
+- file: Particles motion simulation(1D)
+- file: Particles motion simulation(2D)
+- file: Particles motion simulation(Lenaard-Jones potential)
+- file: NumPy-Optimization_Vectorization-and-Broadcasting
+- file: Learn how to use cython
+- file: Speed up Numpy with Cython
+- file: Performance-comparison_N250_Iteration1000
