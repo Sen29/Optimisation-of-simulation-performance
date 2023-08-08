@@ -1,25 +1,15 @@
+# Table of contents
+# Learn more at https://jupyterbook.org/customize/toc.html
+
 format: jb-book
-root: opening
+root: intro
 options:
   numbered: true
 chapters:
-- file: 01-introduction
-- file: 02-powerful-calculator
-- file: 03-data-types-structures
-- file: 04-introspection
-- file: 05-input-output
-- file: 06-control-flow
-- file: 07-functions-modules
-- file: 08-functional-tools
-- file: 09-common-tasks
-- file: 10-matlab-to-python
-- file: 11-python-shells
-- file: 12-symbolic-computation
-- file: 13-numeric-computation
-- file: 14-numpy
-- file: 15-visualising-data
-- file: 16-scipy
-- file: 17-pandas
-- file: 18-environments
-- file: 19-next-steps
-- file: 99-changes
+- file: 01_Particles-motion-simulation(1D)
+- file: 02_Particles-motion-simulation(2D)
+- file: 03_Particles-motion-simulation(Lenaard-Jones-potential)
+- file: 04_NumPy-Optimization_Vectorization-and-Broadcasting
+- file: 05_Learn-how-to-use-cython
+- file: 06_Speed-up-Numpy-with-Cython
+- file: 10_Performance-comparison_N250_Iteration1000

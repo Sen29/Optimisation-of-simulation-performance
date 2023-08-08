@@ -1,12 +1,18 @@
+# Table of contents
+# Learn more at https://jupyterbook.org/customize/toc.html
+
 format: jb-book
-root: opening
+root: intro
 options:
   numbered: true
 chapters:
-- file: Particles motion simulation(1D)
-- file: Particles motion simulation(2D)
-- file: Particles motion simulation(Lenaard-Jones potential)
-- file: NumPy-Optimization_Vectorization-and-Broadcasting
-- file: Learn how to use cython
-- file: Speed up Numpy with Cython
-- file: Performance-comparison_N250_Iteration1000
+- file: 01_Particles-motion-simulation(1D)
+- file: 02_Particles-motion-simulation(2D)
+- file: 03_Particles-motion-simulation(Lenaard-Jones-potential)
+- file: 04_NumPy-Optimization_Vectorization-and-Broadcasting
+- file: 05_MKL
+- file: 06_Learn-how-to-use-cython
+- file: 07_Speed-up-Numpy-with-Cython
+- file: 08_Cython_2D particles_Sum up
+- file: 09_Methods of Inspection
+- file: 20_Performance-comparison_N250_Iteration1000
