@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>9. Learn how to use cython &#8212; Optimisation of simulation performance</title>
+    <title>6. Learn how to use cython &#8212; Optimisation of simulation performance</title>
   
   
   
@@ -64,8 +64,8 @@ const thebe_selector_output = ".output, .cell_output"
     <script>DOCUMENTATION_OPTIONS.pagename = '06_Learn-how-to-use-cython';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="10. How to speed up Numpy with Cython" href="07_Speed-up-Numpy-with-Cython.html" />
-    <link rel="prev" title="5. MKL" href="05_MKL.html" />
+    <link rel="next" title="7. How to speed up Numpy with Cython" href="07_Speed-up-Numpy-with-Cython.html" />
+    <link rel="prev" title="5. Trying to change the threads to improve Numpy’s efficiency" href="05_MKL.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -161,19 +161,15 @@ const thebe_selector_output = ".output, .cell_output"
 <li class="toctree-l1"><a class="reference internal" href="02_Particles-motion-simulation%282D%29.html">2. Two-dimensional particle motion simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="03_Particles-motion-simulation%28Lenaard-Jones-potential%29.html">3. Two-dimensional particle motion simulation_Lennard-Jones potential</a></li>
 <li class="toctree-l1"><a class="reference internal" href="04_NumPy-Optimization_Vectorization-and-Broadcasting.html">4. NumPy Optimization: Vectorization and Broadcasting</a></li>
-<li class="toctree-l1"><a class="reference internal" href="05_MKL.html">5. MKL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_MKL.html">5. Trying to change the threads to improve Numpy’s efficiency</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">6. Learn how to use cython</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07_Speed-up-Numpy-with-Cython.html">7. How to speed up Numpy with Cython</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08_Speed-up-2D-particles-with-Cython.html">8. Speed up 2D particles with Cython</a></li>
 
 
 
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">9. Learn how to use cython</a></li>
-<li class="toctree-l1"><a class="reference internal" href="07_Speed-up-Numpy-with-Cython.html">10. How to speed up Numpy with Cython</a></li>
-<li class="toctree-l1"><a class="reference internal" href="08_Cython_2D%20particles_Sum%20up.html">11. Python code</a></li>
-
-
-
-<li class="toctree-l1"><a class="reference internal" href="09_Methods%20of%20Inspection.html">15. Line profiler</a></li>
-
-<li class="toctree-l1"><a class="reference internal" href="20_Performance-comparison_N250_Iteration1000.html">17. Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="09_Methods%20of%20Inspection.html">12. Methods of Inspection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="20_Performance-comparison_N250_Iteration1000.html">13. Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)</a></li>
 </ul>
 
     </div>
@@ -367,29 +363,29 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cython-intro">9.1. Cython Intro</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-python">9.1.1. using Python:</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-cython">9.1.2. using Cython:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cython-intro">6.1. Cython Intro</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-python">6.1.1. using Python:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-cython">6.1.2. using Cython:</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#show-cythons-code-analysis">9.2. Show Cython’s code analysis</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples">9.3. Examples</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#create-some-data-to-use-for-this-example">9.3.1. Create some data to use for this example</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#operative-part">9.3.2. Operative part</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#numpy-slicing">9.3.3. Numpy slicing</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#numpy-ufunc">9.3.4. NumPy ufunc</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cython">9.3.5. Cython</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#faster-cython-static-types">9.3.6. Faster Cython: static types</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#show-cythons-code-analysis">6.2. Show Cython’s code analysis</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples">6.3. Examples</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#create-some-data-to-use-for-this-example">6.3.1. Create some data to use for this example</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#operative-part">6.3.2. Operative part</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#numpy-slicing">6.3.3. Numpy slicing</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#numpy-ufunc">6.3.4. NumPy ufunc</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cython">6.3.5. Cython</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#faster-cython-static-types">6.3.6. Faster Cython: static types</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise-static-typing-for-speed">9.4. Exercise: static typing for speed</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#faster-cython-processing-memory-views">9.4.1. Faster Cython: processing memory views</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bounds-check">9.4.2. bounds check</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#faster-cython-prange">9.4.3. Faster Cython: prange</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise-static-typing-for-speed">6.4. Exercise: static typing for speed</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#faster-cython-processing-memory-views">6.4.1. Faster Cython: processing memory views</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bounds-check">6.4.2. bounds check</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#faster-cython-prange">6.4.3. Faster Cython: prange</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#more">9.5. more …</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pythran-integration">9.6. Pythran integration</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#more">6.5. more …</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pythran-integration">6.6. Pythran integration</a></li>
 </ul>
             </nav>
         </div>
@@ -402,7 +398,7 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section class="tex2jax_ignore mathjax_ignore" id="learn-how-to-use-cython">
-<h1><span class="section-number">9. </span>Learn how to use cython<a class="headerlink" href="#learn-how-to-use-cython" title="Permalink to this heading">#</a></h1>
+<h1><span class="section-number">6. </span>Learn how to use cython<a class="headerlink" href="#learn-how-to-use-cython" title="Permalink to this heading">#</a></h1>
 <p>Source from <a class="reference external" href="http://consulting.behnel.de/">http://consulting.behnel.de/</a> and <a class="reference external" href="https://www.youtube.com/watch?v=vl9La7wH7QI">https://www.youtube.com/watch?v=vl9La7wH7QI</a></p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -432,9 +428,9 @@ NumPy  1.21.5
 </div>
 </div>
 <section id="cython-intro">
-<h2><span class="section-number">9.1. </span>Cython Intro<a class="headerlink" href="#cython-intro" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">6.1. </span>Cython Intro<a class="headerlink" href="#cython-intro" title="Permalink to this heading">#</a></h2>
 <section id="using-python">
-<h3><span class="section-number">9.1.1. </span>using Python:<a class="headerlink" href="#using-python" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">6.1.1. </span>using Python:<a class="headerlink" href="#using-python" title="Permalink to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sin</span>
@@ -450,7 +446,7 @@ NumPy  1.21.5
 </div>
 </section>
 <section id="using-cython">
-<h3><span class="section-number">9.1.2. </span>using Cython:<a class="headerlink" href="#using-cython" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">6.1.2. </span>using Cython:<a class="headerlink" href="#using-cython" title="Permalink to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> cython
@@ -528,7 +524,7 @@ def csin(double x):
 </section>
 </section>
 <section id="show-cythons-code-analysis">
-<h2><span class="section-number">9.2. </span>Show Cython’s code analysis<a class="headerlink" href="#show-cythons-code-analysis" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">6.2. </span>Show Cython’s code analysis<a class="headerlink" href="#show-cythons-code-analysis" title="Permalink to this heading">#</a></h2>
 <p>by passing the ‘–annotate’ option(or just ‘-a’):</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -1438,9 +1434,9 @@ static PyObject *__pyx_pf_46_cython_magic_eabc7642c83c38db29415342c79668b1_squar
 </div>
 </section>
 <section id="examples">
-<h2><span class="section-number">9.3. </span>Examples<a class="headerlink" href="#examples" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">6.3. </span>Examples<a class="headerlink" href="#examples" title="Permalink to this heading">#</a></h2>
 <section id="create-some-data-to-use-for-this-example">
-<h3><span class="section-number">9.3.1. </span>Create some data to use for this example<a class="headerlink" href="#create-some-data-to-use-for-this-example" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">6.3.1. </span>Create some data to use for this example<a class="headerlink" href="#create-some-data-to-use-for-this-example" title="Permalink to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">people</span> <span class="o">=</span> <span class="mi">44_000_000</span>
@@ -1492,7 +1488,7 @@ Draw samples from a log-normal distribution. Mean value ‘mu’ of the underlyi
 </div>
 </section>
 <section id="operative-part">
-<h3><span class="section-number">9.3.2. </span>Operative part<a class="headerlink" href="#operative-part" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">6.3.2. </span>Operative part<a class="headerlink" href="#operative-part" title="Permalink to this heading">#</a></h3>
 <p>Let’s calculate everyone’s taxes.(<a class="reference external" href="https://de.wikipedia.org/wiki/Einkommensteuer_%28Deutschland%29#Tarif_2017">https://de.wikipedia.org/wiki/Einkommensteuer_(Deutschland)#Tarif_2017</a>)</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -1599,7 +1595,7 @@ Draw samples from a log-normal distribution. Mean value ‘mu’ of the underlyi
 </div>
 </section>
 <section id="numpy-slicing">
-<h3><span class="section-number">9.3.3. </span>Numpy slicing<a class="headerlink" href="#numpy-slicing" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">6.3.3. </span>Numpy slicing<a class="headerlink" href="#numpy-slicing" title="Permalink to this heading">#</a></h3>
 <p>Let’s use the following code instead of the above section.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -1667,7 +1663,7 @@ Draw samples from a log-normal distribution. Mean value ‘mu’ of the underlyi
 </div>
 </section>
 <section id="numpy-ufunc">
-<h3><span class="section-number">9.3.4. </span>NumPy ufunc<a class="headerlink" href="#numpy-ufunc" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">6.3.4. </span>NumPy ufunc<a class="headerlink" href="#numpy-ufunc" title="Permalink to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">calculate_tax_numpy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frompyfunc</span><span class="p">(</span><span class="n">calculate_tax</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -1717,7 +1713,7 @@ Draw samples from a log-normal distribution. Mean value ‘mu’ of the underlyi
 </div>
 </section>
 <section id="cython">
-<h3><span class="section-number">9.3.5. </span>Cython<a class="headerlink" href="#cython" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">6.3.5. </span>Cython<a class="headerlink" href="#cython" title="Permalink to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="k">cython</span> -a
@@ -2581,7 +2577,7 @@ cython_copy:    1.00
 </div>
 </section>
 <section id="faster-cython-static-types">
-<h3><span class="section-number">9.3.6. </span>Faster Cython: static types<a class="headerlink" href="#faster-cython-static-types" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">6.3.6. </span>Faster Cython: static types<a class="headerlink" href="#faster-cython-static-types" title="Permalink to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="k">cython</span> -a
@@ -3897,7 +3893,7 @@ cython_copy:   87.58
 </section>
 </section>
 <section id="exercise-static-typing-for-speed">
-<h2><span class="section-number">9.4. </span>Exercise: static typing for speed<a class="headerlink" href="#exercise-static-typing-for-speed" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">6.4. </span>Exercise: static typing for speed<a class="headerlink" href="#exercise-static-typing-for-speed" title="Permalink to this heading">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">math</span>
@@ -4507,7 +4503,7 @@ static PyObject *__pyx_pf_46_cython_magic_05731be6528a27eca09a408da6a4fbb1_circu
 </div>
 </div>
 <section id="faster-cython-processing-memory-views">
-<h3><span class="section-number">9.4.1. </span>Faster Cython: processing memory views<a class="headerlink" href="#faster-cython-processing-memory-views" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">6.4.1. </span>Faster Cython: processing memory views<a class="headerlink" href="#faster-cython-processing-memory-views" title="Permalink to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="k">cython</span> -a
@@ -5152,7 +5148,7 @@ cython_copy:  231.09
 </div>
 </section>
 <section id="bounds-check">
-<h3><span class="section-number">9.4.2. </span>bounds check<a class="headerlink" href="#bounds-check" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">6.4.2. </span>bounds check<a class="headerlink" href="#bounds-check" title="Permalink to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="k">cython</span> -a
@@ -5777,7 +5773,7 @@ cython_copy:  247.75
 </div>
 </section>
 <section id="faster-cython-prange">
-<h3><span class="section-number">9.4.3. </span>Faster Cython: prange<a class="headerlink" href="#faster-cython-prange" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">6.4.3. </span>Faster Cython: prange<a class="headerlink" href="#faster-cython-prange" title="Permalink to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="k">cython</span> -f -c=/openmp
@@ -5861,7 +5857,7 @@ cython_copy:  638.05
 </section>
 </section>
 <section id="more">
-<h2><span class="section-number">9.5. </span>more …<a class="headerlink" href="#more" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">6.5. </span>more …<a class="headerlink" href="#more" title="Permalink to this heading">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="k">cython</span>
@@ -5903,7 +5899,7 @@ def average_tax_numcy(cnp.ndarray[double, ndim=1] incomes):
 </div>
 </section>
 <section id="pythran-integration">
-<h2><span class="section-number">9.6. </span>Pythran integration<a class="headerlink" href="#pythran-integration" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">6.6. </span>Pythran integration<a class="headerlink" href="#pythran-integration" title="Permalink to this heading">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="k">cython</span>
@@ -5971,7 +5967,7 @@ def calculate_tax_numpy_segments(cnp.ndarray[double, ndim=1] d):
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title"><span class="section-number">5. </span>MKL</p>
+        <p class="prev-next-title"><span class="section-number">5. </span>Trying to change the threads to improve Numpy’s efficiency</p>
       </div>
     </a>
     <a class="right-next"
@@ -5979,7 +5975,7 @@ def calculate_tax_numpy_segments(cnp.ndarray[double, ndim=1] d):
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><span class="section-number">10. </span>How to speed up Numpy with Cython</p>
+        <p class="prev-next-title"><span class="section-number">7. </span>How to speed up Numpy with Cython</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -6001,29 +5997,29 @@ def calculate_tax_numpy_segments(cnp.ndarray[double, ndim=1] d):
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cython-intro">9.1. Cython Intro</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-python">9.1.1. using Python:</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-cython">9.1.2. using Cython:</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cython-intro">6.1. Cython Intro</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-python">6.1.1. using Python:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-cython">6.1.2. using Cython:</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#show-cythons-code-analysis">9.2. Show Cython’s code analysis</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples">9.3. Examples</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#create-some-data-to-use-for-this-example">9.3.1. Create some data to use for this example</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#operative-part">9.3.2. Operative part</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#numpy-slicing">9.3.3. Numpy slicing</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#numpy-ufunc">9.3.4. NumPy ufunc</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cython">9.3.5. Cython</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#faster-cython-static-types">9.3.6. Faster Cython: static types</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#show-cythons-code-analysis">6.2. Show Cython’s code analysis</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#examples">6.3. Examples</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#create-some-data-to-use-for-this-example">6.3.1. Create some data to use for this example</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#operative-part">6.3.2. Operative part</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#numpy-slicing">6.3.3. Numpy slicing</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#numpy-ufunc">6.3.4. NumPy ufunc</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cython">6.3.5. Cython</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#faster-cython-static-types">6.3.6. Faster Cython: static types</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise-static-typing-for-speed">9.4. Exercise: static typing for speed</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#faster-cython-processing-memory-views">9.4.1. Faster Cython: processing memory views</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bounds-check">9.4.2. bounds check</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#faster-cython-prange">9.4.3. Faster Cython: prange</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#exercise-static-typing-for-speed">6.4. Exercise: static typing for speed</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#faster-cython-processing-memory-views">6.4.1. Faster Cython: processing memory views</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#bounds-check">6.4.2. bounds check</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#faster-cython-prange">6.4.3. Faster Cython: prange</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#more">9.5. more …</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pythran-integration">9.6. Pythran integration</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#more">6.5. more …</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#pythran-integration">6.6. Pythran integration</a></li>
 </ul>
   </nav></div>
 

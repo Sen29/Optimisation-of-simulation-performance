@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>17. Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C) &#8212; Optimisation of simulation performance</title>
+    <title>10. Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C) &#8212; Optimisation of simulation performance</title>
   
   
   
@@ -64,7 +64,7 @@ const thebe_selector_output = ".output, .cell_output"
     <script>DOCUMENTATION_OPTIONS.pagename = '20_Performance-comparison_N250_Iteration1000';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="15. Line profiler" href="09_Methods%20of%20Inspection.html" />
+    <link rel="prev" title="9. Methods of Inspection" href="09_Methods%20of%20Inspection.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -160,19 +160,12 @@ const thebe_selector_output = ".output, .cell_output"
 <li class="toctree-l1"><a class="reference internal" href="02_Particles-motion-simulation%282D%29.html">2. Two-dimensional particle motion simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="03_Particles-motion-simulation%28Lenaard-Jones-potential%29.html">3. Two-dimensional particle motion simulation_Lennard-Jones potential</a></li>
 <li class="toctree-l1"><a class="reference internal" href="04_NumPy-Optimization_Vectorization-and-Broadcasting.html">4. NumPy Optimization: Vectorization and Broadcasting</a></li>
-<li class="toctree-l1"><a class="reference internal" href="05_MKL.html">5. MKL</a></li>
-
-
-
-<li class="toctree-l1"><a class="reference internal" href="06_Learn-how-to-use-cython.html">9. Learn how to use cython</a></li>
-<li class="toctree-l1"><a class="reference internal" href="07_Speed-up-Numpy-with-Cython.html">10. How to speed up Numpy with Cython</a></li>
-<li class="toctree-l1"><a class="reference internal" href="08_Cython_2D%20particles_Sum%20up.html">11. Python code</a></li>
-
-
-
-<li class="toctree-l1"><a class="reference internal" href="09_Methods%20of%20Inspection.html">15. Line profiler</a></li>
-
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">17. Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_MKL.html">5. Trying to change the threads to improve Numpy’s efficiency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_Learn-how-to-use-cython.html">6. Learn how to use cython</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07_Speed-up-Numpy-with-Cython.html">7. How to speed up Numpy with Cython</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08_Speed-up-2D-particles-with-Cython.html">8. Speed up 2D particles with Cython</a></li>
+<li class="toctree-l1"><a class="reference internal" href="09_Methods%20of%20Inspection.html">9. Methods of Inspection</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">10. Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)</a></li>
 </ul>
 
     </div>
@@ -366,36 +359,36 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#python-py">17.1. Python (Py)</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#py-code">17.1.1. Py code</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-for-py">17.1.2. Plot for Py</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-py">17.1.3. Execution time for Py</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#python-py">10.1. Python (Py)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#py-code">10.1.1. Py code</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-for-py">10.1.2. Plot for Py</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-py">10.1.3. Execution time for Py</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#numpy-np">17.2. Numpy (Np)</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#np-code">17.2.1. Np code</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-for-np">17.2.2. Plot for Np</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-np">17.2.3. Execution time for Np</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#numpy-np">10.2. Numpy (Np)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#np-code">10.2.1. Np code</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-for-np">10.2.2. Plot for Np</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-np">10.2.3. Execution time for Np</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#numba-nb">17.3. Numba (Nb)</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nb-code">17.3.1. Nb code</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-nb">17.3.2. Execution time for Nb</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#numba-nb">10.3. Numba (Nb)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nb-code">10.3.1. Nb code</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-nb">10.3.2. Execution time for Nb</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cython-cy">17.4. Cython (Cy)</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cy-code">17.4.1. Cy code</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-cy">17.4.2. Execution time for Cy</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cy-threads-4-code">17.4.3. Cy_threads_4 code</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-cy-threads-4">17.4.4. Execution time for Cy_threads_4</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cython-cy">10.4. Cython (Cy)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cy-code">10.4.1. Cy code</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-cy">10.4.2. Execution time for Cy</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cy-threads-4-code">10.4.3. Cy_threads_4 code</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-cy-threads-4">10.4.4. Execution time for Cy_threads_4</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c">17.5. C</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#c-code">17.5.1. C code</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-c">17.5.2. Execution time for C</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c">10.5. C</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#c-code">10.5.1. C code</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-c">10.5.2. Execution time for C</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-comparison">17.6. Performance-comparison</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-comparison">10.6. Performance-comparison</a></li>
 </ul>
             </nav>
         </div>
@@ -408,15 +401,15 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section class="tex2jax_ignore mathjax_ignore" id="performance-comparison-python-numpy-numba-cython-c">
-<h1><span class="section-number">17. </span>Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)<a class="headerlink" href="#performance-comparison-python-numpy-numba-cython-c" title="Permalink to this heading">#</a></h1>
+<h1><span class="section-number">10. </span>Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)<a class="headerlink" href="#performance-comparison-python-numpy-numba-cython-c" title="Permalink to this heading">#</a></h1>
 <p>The following program is a simulation of particle motion with the lenaard-jones potential, with n controlling the number of particles and iterations controlling the number of iterations.
 The article concludes with a comparison of the performance of the Python version, the vectorisation optimised version using Numpy, the optimised version using Cython, and the version using C.</p>
 <p>Model of particle motion: the forces between particles utilise the Lennard Jones potential, whereby particles repel each other when they are less widely spaced and attract each other when they are more widely spaced.</p>
 <section id="python-py">
-<h2><span class="section-number">17.1. </span>Python (Py)<a class="headerlink" href="#python-py" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">10.1. </span>Python (Py)<a class="headerlink" href="#python-py" title="Permalink to this heading">#</a></h2>
 <p>The code below uses the Python language and is the original baseline version without any optimisations.</p>
 <section id="py-code">
-<h3><span class="section-number">17.1.1. </span>Py code<a class="headerlink" href="#py-code" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">10.1.1. </span>Py code<a class="headerlink" href="#py-code" title="Permalink to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -529,7 +522,7 @@ The article concludes with a comparison of the performance of the Python version
 </div>
 </section>
 <section id="plot-for-py">
-<h3><span class="section-number">17.1.2. </span>Plot for Py<a class="headerlink" href="#plot-for-py" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">10.1.2. </span>Plot for Py<a class="headerlink" href="#plot-for-py" title="Permalink to this heading">#</a></h3>
 <p>Show the trajectory of the particle in the diagram:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -546,7 +539,7 @@ The article concludes with a comparison of the performance of the Python version
 </div>
 </section>
 <section id="execution-time-for-py">
-<h3><span class="section-number">17.1.3. </span>Execution time for Py<a class="headerlink" href="#execution-time-for-py" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">10.1.3. </span>Execution time for Py<a class="headerlink" href="#execution-time-for-py" title="Permalink to this heading">#</a></h3>
 <p>Calculating execution time for python versions:</p>
 <p>(Execution time is “compute_time_py”)</p>
 <div class="cell docutils container">
@@ -565,10 +558,10 @@ The article concludes with a comparison of the performance of the Python version
 </section>
 </section>
 <section id="numpy-np">
-<h2><span class="section-number">17.2. </span>Numpy (Np)<a class="headerlink" href="#numpy-np" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">10.2. </span>Numpy (Np)<a class="headerlink" href="#numpy-np" title="Permalink to this heading">#</a></h2>
 <p>The following code is optimised for vectorisation with numpy.</p>
 <section id="np-code">
-<h3><span class="section-number">17.2.1. </span>Np code<a class="headerlink" href="#np-code" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">10.2.1. </span>Np code<a class="headerlink" href="#np-code" title="Permalink to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -682,7 +675,7 @@ The article concludes with a comparison of the performance of the Python version
 </div>
 </section>
 <section id="plot-for-np">
-<h3><span class="section-number">17.2.2. </span>Plot for Np<a class="headerlink" href="#plot-for-np" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">10.2.2. </span>Plot for Np<a class="headerlink" href="#plot-for-np" title="Permalink to this heading">#</a></h3>
 <p>Show the trajectory of the particle in the diagram:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -699,7 +692,7 @@ The article concludes with a comparison of the performance of the Python version
 </div>
 </section>
 <section id="execution-time-for-np">
-<h3><span class="section-number">17.2.3. </span>Execution time for Np<a class="headerlink" href="#execution-time-for-np" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">10.2.3. </span>Execution time for Np<a class="headerlink" href="#execution-time-for-np" title="Permalink to this heading">#</a></h3>
 <p>Calculating execution time for numpy versions:</p>
 <p>(Execution time is “compute_time_np”)</p>
 <div class="cell docutils container">
@@ -719,10 +712,10 @@ The article concludes with a comparison of the performance of the Python version
 </section>
 </section>
 <section id="numba-nb">
-<h2><span class="section-number">17.3. </span>Numba (Nb)<a class="headerlink" href="#numba-nb" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">10.3. </span>Numba (Nb)<a class="headerlink" href="#numba-nb" title="Permalink to this heading">#</a></h2>
 <p>Optimisation with Numba.</p>
 <section id="nb-code">
-<h3><span class="section-number">17.3.1. </span>Nb code<a class="headerlink" href="#nb-code" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">10.3.1. </span>Nb code<a class="headerlink" href="#nb-code" title="Permalink to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -824,7 +817,7 @@ The article concludes with a comparison of the performance of the Python version
 </div>
 </section>
 <section id="execution-time-for-nb">
-<h3><span class="section-number">17.3.2. </span>Execution time for Nb<a class="headerlink" href="#execution-time-for-nb" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">10.3.2. </span>Execution time for Nb<a class="headerlink" href="#execution-time-for-nb" title="Permalink to this heading">#</a></h3>
 <p>Calculating execution time for numba versions:</p>
 <p>(Execution time is “compute_time_nb”)</p>
 <div class="cell docutils container">
@@ -844,10 +837,10 @@ The article concludes with a comparison of the performance of the Python version
 </section>
 </section>
 <section id="cython-cy">
-<h2><span class="section-number">17.4. </span>Cython (Cy)<a class="headerlink" href="#cython-cy" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">10.4. </span>Cython (Cy)<a class="headerlink" href="#cython-cy" title="Permalink to this heading">#</a></h2>
 <p>Optimisation with Cython.</p>
 <section id="cy-code">
-<h3><span class="section-number">17.4.1. </span>Cy code<a class="headerlink" href="#cy-code" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">10.4.1. </span>Cy code<a class="headerlink" href="#cy-code" title="Permalink to this heading">#</a></h3>
 <p>number of threads is 1 by default.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -966,7 +959,7 @@ cpdef update_position(cnp.ndarray[double, ndim=2] p, cnp.ndarray[double, ndim=2]
 </div>
 </section>
 <section id="execution-time-for-cy">
-<h3><span class="section-number">17.4.2. </span>Execution time for Cy<a class="headerlink" href="#execution-time-for-cy" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">10.4.2. </span>Execution time for Cy<a class="headerlink" href="#execution-time-for-cy" title="Permalink to this heading">#</a></h3>
 <p>Calculating execution time for cython versions (number of threads is 4):</p>
 <p>(Execution time is “compute_time_cy”)</p>
 <div class="cell docutils container">
@@ -984,7 +977,7 @@ cpdef update_position(cnp.ndarray[double, ndim=2] p, cnp.ndarray[double, ndim=2]
 </div>
 </section>
 <section id="cy-threads-4-code">
-<h3><span class="section-number">17.4.3. </span>Cy_threads_4 code<a class="headerlink" href="#cy-threads-4-code" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">10.4.3. </span>Cy_threads_4 code<a class="headerlink" href="#cy-threads-4-code" title="Permalink to this heading">#</a></h3>
 <p>number of threads is 4.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -1090,7 +1083,7 @@ cpdef update_position(cnp.ndarray[double, ndim=2] p, cnp.ndarray[double, ndim=2]
 </div>
 </section>
 <section id="execution-time-for-cy-threads-4">
-<h3><span class="section-number">17.4.4. </span>Execution time for Cy_threads_4<a class="headerlink" href="#execution-time-for-cy-threads-4" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">10.4.4. </span>Execution time for Cy_threads_4<a class="headerlink" href="#execution-time-for-cy-threads-4" title="Permalink to this heading">#</a></h3>
 <p>Calculating execution time for cython versions (number of threads is 4):</p>
 <p>(Execution time is “compute_time_cy_threads_4”)</p>
 <div class="cell docutils container">
@@ -1109,10 +1102,10 @@ cpdef update_position(cnp.ndarray[double, ndim=2] p, cnp.ndarray[double, ndim=2]
 </section>
 </section>
 <section id="c">
-<h2><span class="section-number">17.5. </span>C<a class="headerlink" href="#c" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">10.5. </span>C<a class="headerlink" href="#c" title="Permalink to this heading">#</a></h2>
 <p>Reconstructing particle motion models in C.</p>
 <section id="c-code">
-<h3><span class="section-number">17.5.1. </span>C code<a class="headerlink" href="#c-code" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">10.5.1. </span>C code<a class="headerlink" href="#c-code" title="Permalink to this heading">#</a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%file</span> executiontime.c
@@ -1240,7 +1233,7 @@ cpdef update_position(cnp.ndarray[double, ndim=2] p, cnp.ndarray[double, ndim=2]
 </div>
 </section>
 <section id="execution-time-for-c">
-<h3><span class="section-number">17.5.2. </span>Execution time for C<a class="headerlink" href="#execution-time-for-c" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">10.5.2. </span>Execution time for C<a class="headerlink" href="#execution-time-for-c" title="Permalink to this heading">#</a></h3>
 <p>Calculating execution time for C versions:</p>
 <p>(Execution time is “simulate_c_execution_time”)</p>
 <div class="cell docutils container">
@@ -1270,7 +1263,7 @@ cpdef update_position(cnp.ndarray[double, ndim=2] p, cnp.ndarray[double, ndim=2]
 </section>
 </section>
 <section id="performance-comparison">
-<h2><span class="section-number">17.6. </span>Performance-comparison<a class="headerlink" href="#performance-comparison" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">10.6. </span>Performance-comparison<a class="headerlink" href="#performance-comparison" title="Permalink to this heading">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -1409,7 +1402,7 @@ cpdef update_position(cnp.ndarray[double, ndim=2] p, cnp.ndarray[double, ndim=2]
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title"><span class="section-number">15. </span>Line profiler</p>
+        <p class="prev-next-title"><span class="section-number">9. </span>Methods of Inspection</p>
       </div>
     </a>
 </div></div>
@@ -1430,36 +1423,36 @@ cpdef update_position(cnp.ndarray[double, ndim=2] p, cnp.ndarray[double, ndim=2]
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#python-py">17.1. Python (Py)</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#py-code">17.1.1. Py code</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-for-py">17.1.2. Plot for Py</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-py">17.1.3. Execution time for Py</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#python-py">10.1. Python (Py)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#py-code">10.1.1. Py code</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-for-py">10.1.2. Plot for Py</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-py">10.1.3. Execution time for Py</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#numpy-np">17.2. Numpy (Np)</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#np-code">17.2.1. Np code</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-for-np">17.2.2. Plot for Np</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-np">17.2.3. Execution time for Np</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#numpy-np">10.2. Numpy (Np)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#np-code">10.2.1. Np code</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-for-np">10.2.2. Plot for Np</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-np">10.2.3. Execution time for Np</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#numba-nb">17.3. Numba (Nb)</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nb-code">17.3.1. Nb code</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-nb">17.3.2. Execution time for Nb</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#numba-nb">10.3. Numba (Nb)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nb-code">10.3.1. Nb code</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-nb">10.3.2. Execution time for Nb</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cython-cy">17.4. Cython (Cy)</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cy-code">17.4.1. Cy code</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-cy">17.4.2. Execution time for Cy</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cy-threads-4-code">17.4.3. Cy_threads_4 code</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-cy-threads-4">17.4.4. Execution time for Cy_threads_4</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cython-cy">10.4. Cython (Cy)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cy-code">10.4.1. Cy code</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-cy">10.4.2. Execution time for Cy</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cy-threads-4-code">10.4.3. Cy_threads_4 code</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-cy-threads-4">10.4.4. Execution time for Cy_threads_4</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c">17.5. C</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#c-code">17.5.1. C code</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-c">17.5.2. Execution time for C</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c">10.5. C</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#c-code">10.5.1. C code</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-c">10.5.2. Execution time for C</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-comparison">17.6. Performance-comparison</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-comparison">10.6. Performance-comparison</a></li>
 </ul>
   </nav></div>
 

@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>15. Line profiler &#8212; Optimisation of simulation performance</title>
+    <title>9. Methods of Inspection &#8212; Optimisation of simulation performance</title>
   
   
   
@@ -64,8 +64,8 @@ const thebe_selector_output = ".output, .cell_output"
     <script>DOCUMENTATION_OPTIONS.pagename = '09_Methods of Inspection';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="17. Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)" href="20_Performance-comparison_N250_Iteration1000.html" />
-    <link rel="prev" title="11. Python code" href="08_Cython_2D%20particles_Sum%20up.html" />
+    <link rel="next" title="10. Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)" href="20_Performance-comparison_N250_Iteration1000.html" />
+    <link rel="prev" title="8. Speed up 2D particles with Cython" href="08_Speed-up-2D-particles-with-Cython.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -161,19 +161,12 @@ const thebe_selector_output = ".output, .cell_output"
 <li class="toctree-l1"><a class="reference internal" href="02_Particles-motion-simulation%282D%29.html">2. Two-dimensional particle motion simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="03_Particles-motion-simulation%28Lenaard-Jones-potential%29.html">3. Two-dimensional particle motion simulation_Lennard-Jones potential</a></li>
 <li class="toctree-l1"><a class="reference internal" href="04_NumPy-Optimization_Vectorization-and-Broadcasting.html">4. NumPy Optimization: Vectorization and Broadcasting</a></li>
-<li class="toctree-l1"><a class="reference internal" href="05_MKL.html">5. MKL</a></li>
-
-
-
-<li class="toctree-l1"><a class="reference internal" href="06_Learn-how-to-use-cython.html">9. Learn how to use cython</a></li>
-<li class="toctree-l1"><a class="reference internal" href="07_Speed-up-Numpy-with-Cython.html">10. How to speed up Numpy with Cython</a></li>
-<li class="toctree-l1"><a class="reference internal" href="08_Cython_2D%20particles_Sum%20up.html">11. Python code</a></li>
-
-
-
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">15. Line profiler</a></li>
-
-<li class="toctree-l1"><a class="reference internal" href="20_Performance-comparison_N250_Iteration1000.html">17. Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_MKL.html">5. Trying to change the threads to improve Numpy’s efficiency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_Learn-how-to-use-cython.html">6. Learn how to use cython</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07_Speed-up-Numpy-with-Cython.html">7. How to speed up Numpy with Cython</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08_Speed-up-2D-particles-with-Cython.html">8. Speed up 2D particles with Cython</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">9. Methods of Inspection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="20_Performance-comparison_N250_Iteration1000.html">10. Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)</a></li>
 </ul>
 
     </div>
@@ -357,7 +350,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>Line profiler</h1>
+    <h1>Methods of Inspection</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -367,17 +360,16 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">15. Line profiler</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#install">15.1. Install</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example">15.2. Example</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#line-profiler">9.1. Line profiler</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#install">9.1.1. Install</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#example">9.1.2. Example</a></li>
 </ul>
 </li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#view-check">16. View check</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">16.1. Example</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#view-check">9.2. View check</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">9.2.1. Example</a></li>
 </ul>
 </li>
 </ul>
-
             </nav>
         </div>
     </div>
@@ -388,15 +380,17 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <h1 style="text-align: center;">Methods of Inspection</h1><section id="line-profiler">
-<h1><span class="section-number">15. </span>Line profiler<a class="headerlink" href="#line-profiler" title="Permalink to this heading">#</a></h1>
+  <section class="tex2jax_ignore mathjax_ignore" id="methods-of-inspection">
+<h1><span class="section-number">9. </span>Methods of Inspection<a class="headerlink" href="#methods-of-inspection" title="Permalink to this heading">#</a></h1>
+<section id="line-profiler">
+<h2><span class="section-number">9.1. </span>Line profiler<a class="headerlink" href="#line-profiler" title="Permalink to this heading">#</a></h2>
 <p>line_profiler is a Python module for analyzing code execution time, especially for each line of code execution time in detail. It can help us locate performance bottlenecks in our code and find areas that can be optimized. By using line_profiler, we can better understand the performance characteristics of the code and target optimizations to improve the efficiency of program execution.</p>
 <section id="install">
-<h2><span class="section-number">15.1. </span>Install<a class="headerlink" href="#install" title="Permalink to this heading">#</a></h2>
+<h3><span class="section-number">9.1.1. </span>Install<a class="headerlink" href="#install" title="Permalink to this heading">#</a></h3>
 <p>Run the command in the terminal:<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">line-profiler</span></code></p>
 </section>
 <section id="example">
-<h2><span class="section-number">15.2. </span>Example<a class="headerlink" href="#example" title="Permalink to this heading">#</a></h2>
+<h3><span class="section-number">9.1.2. </span>Example<a class="headerlink" href="#example" title="Permalink to this heading">#</a></h3>
 <p>Let’s take a simple example: calculating the sum of squares of a large array.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -446,10 +440,10 @@ Line #      Hits         Time  Per Hit   % Time  Line Contents
 </section>
 </section>
 <section id="view-check">
-<h1><span class="section-number">16. </span>View check<a class="headerlink" href="#view-check" title="Permalink to this heading">#</a></h1>
+<h2><span class="section-number">9.2. </span>View check<a class="headerlink" href="#view-check" title="Permalink to this heading">#</a></h2>
 <p>当创建一个数组的视图（view）时，它与原始数组共享相同的数据缓冲区。通常情况下，使用view更快，因为它避免了数据的复制和额外的内存分配。因此我们有检查view的必要。</p>
 <section id="id1">
-<h2><span class="section-number">16.1. </span>Example<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h2>
+<h3><span class="section-number">9.2.1. </span>Example<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h3>
 <p>我们首先创建一个数组C。</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -597,6 +591,7 @@ Timer unit: 1e-07 s
 </div>
 </section>
 </section>
+</section>
 
     <script type="text/x-thebe-config">
     {
@@ -630,12 +625,12 @@ Timer unit: 1e-07 s
     <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="08_Cython_2D%20particles_Sum%20up.html"
+       href="08_Speed-up-2D-particles-with-Cython.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title"><span class="section-number">11. </span>Python code</p>
+        <p class="prev-next-title"><span class="section-number">8. </span>Speed up 2D particles with Cython</p>
       </div>
     </a>
     <a class="right-next"
@@ -643,7 +638,7 @@ Timer unit: 1e-07 s
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><span class="section-number">17. </span>Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)</p>
+        <p class="prev-next-title"><span class="section-number">10. </span>Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -665,17 +660,16 @@ Timer unit: 1e-07 s
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">15. Line profiler</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#install">15.1. Install</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example">15.2. Example</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#line-profiler">9.1. Line profiler</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#install">9.1.1. Install</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#example">9.1.2. Example</a></li>
 </ul>
 </li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#view-check">16. View check</a><ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">16.1. Example</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#view-check">9.2. View check</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">9.2.1. Example</a></li>
 </ul>
 </li>
 </ul>
-
   </nav></div>
 
 </div></div>

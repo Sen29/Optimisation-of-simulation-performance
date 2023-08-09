@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>5. MKL &#8212; Optimisation of simulation performance</title>
+    <title>5. Trying to change the threads to improve Numpy’s efficiency &#8212; Optimisation of simulation performance</title>
   
   
   
@@ -64,7 +64,7 @@ const thebe_selector_output = ".output, .cell_output"
     <script>DOCUMENTATION_OPTIONS.pagename = '05_MKL';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="9. Learn how to use cython" href="06_Learn-how-to-use-cython.html" />
+    <link rel="next" title="6. Learn how to use cython" href="06_Learn-how-to-use-cython.html" />
     <link rel="prev" title="4. NumPy Optimization: Vectorization and Broadcasting" href="04_NumPy-Optimization_Vectorization-and-Broadcasting.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -161,19 +161,15 @@ const thebe_selector_output = ".output, .cell_output"
 <li class="toctree-l1"><a class="reference internal" href="02_Particles-motion-simulation%282D%29.html">2. Two-dimensional particle motion simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="03_Particles-motion-simulation%28Lenaard-Jones-potential%29.html">3. Two-dimensional particle motion simulation_Lennard-Jones potential</a></li>
 <li class="toctree-l1"><a class="reference internal" href="04_NumPy-Optimization_Vectorization-and-Broadcasting.html">4. NumPy Optimization: Vectorization and Broadcasting</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">5. MKL</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">5. Trying to change the threads to improve Numpy’s efficiency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_Learn-how-to-use-cython.html">6. Learn how to use cython</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07_Speed-up-Numpy-with-Cython.html">7. How to speed up Numpy with Cython</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08_Speed-up-2D-particles-with-Cython.html">8. Speed up 2D particles with Cython</a></li>
 
 
 
-<li class="toctree-l1"><a class="reference internal" href="06_Learn-how-to-use-cython.html">9. Learn how to use cython</a></li>
-<li class="toctree-l1"><a class="reference internal" href="07_Speed-up-Numpy-with-Cython.html">10. How to speed up Numpy with Cython</a></li>
-<li class="toctree-l1"><a class="reference internal" href="08_Cython_2D%20particles_Sum%20up.html">11. Python code</a></li>
-
-
-
-<li class="toctree-l1"><a class="reference internal" href="09_Methods%20of%20Inspection.html">15. Line profiler</a></li>
-
-<li class="toctree-l1"><a class="reference internal" href="20_Performance-comparison_N250_Iteration1000.html">17. Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="09_Methods%20of%20Inspection.html">12. Methods of Inspection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="20_Performance-comparison_N250_Iteration1000.html">13. Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)</a></li>
 </ul>
 
     </div>
@@ -357,7 +353,7 @@ document.write(`
               
 
 <div id="jb-print-docs-body" class="onlyprint">
-    <h1>MKL</h1>
+    <h1>Trying to change the threads to improve Numpy’s efficiency</h1>
     <!-- Table of contents -->
     <div id="print-main-content">
         <div id="jb-print-toc">
@@ -367,12 +363,11 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">5. MKL</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#check-if-mkl-already-exists-in-the-system">6. Check if MKL already exists in the system</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#example-of-changing-the-number-of-threads">7. Example of changing the number of threads</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#conclusion">8. Conclusion</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mkl">5.1. MKL</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#check-if-mkl-already-exists-in-the-system">5.2. Check if MKL already exists in the system</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-of-changing-the-number-of-threads">5.3. Example of changing the number of threads</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conclusion">5.4. Conclusion</a></li>
 </ul>
-
             </nav>
         </div>
     </div>
@@ -383,14 +378,16 @@ document.write(`
 <div id="searchbox"></div>
                 <article class="bd-article" role="main">
                   
-  <h1 style="text-align: center;">Trying to change the threads to improve Numpy's efficiency</h1><p>We can change the number of threads by using MKL implementation.</p>
+  <section class="tex2jax_ignore mathjax_ignore" id="trying-to-change-the-threads-to-improve-numpy-s-efficiency">
+<h1><span class="section-number">5. </span>Trying to change the threads to improve Numpy’s efficiency<a class="headerlink" href="#trying-to-change-the-threads-to-improve-numpy-s-efficiency" title="Permalink to this heading">#</a></h1>
+<p>We can change the number of threads by using MKL implementation.</p>
 <section id="mkl">
-<h1><span class="section-number">5. </span>MKL<a class="headerlink" href="#mkl" title="Permalink to this heading">#</a></h1>
+<h2><span class="section-number">5.1. </span>MKL<a class="headerlink" href="#mkl" title="Permalink to this heading">#</a></h2>
 <p>MKL (Intel Math Kernel Library) is a maths library optimised for Intel processors, which provides highly optimised mathematical routines, especially for multi-core processors. When NumPy is built with MKL support, NumPy can take advantage of the parallelisation routines provided by MKL to accelerate numerical computation.</p>
 <p>Currently, numpy is usually bundled with MKL, so we can do thread checking with the following code.</p>
 </section>
 <section id="check-if-mkl-already-exists-in-the-system">
-<h1><span class="section-number">6. </span>Check if MKL already exists in the system<a class="headerlink" href="#check-if-mkl-already-exists-in-the-system" title="Permalink to this heading">#</a></h1>
+<h2><span class="section-number">5.2. </span>Check if MKL already exists in the system<a class="headerlink" href="#check-if-mkl-already-exists-in-the-system" title="Permalink to this heading">#</a></h2>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -411,7 +408,7 @@ document.write(`
 <p>But if we want to change the number of threads, we can use <code class="docutils literal notranslate"><span class="pre">set_num_threads()</span></code>.</p>
 </section>
 <section id="example-of-changing-the-number-of-threads">
-<h1><span class="section-number">7. </span>Example of changing the number of threads<a class="headerlink" href="#example-of-changing-the-number-of-threads" title="Permalink to this heading">#</a></h1>
+<h2><span class="section-number">5.3. </span>Example of changing the number of threads<a class="headerlink" href="#example-of-changing-the-number-of-threads" title="Permalink to this heading">#</a></h2>
 <p>Here we use a simple matrix multiplication example to try the effect of changing the threads (number of threads changed to 1).</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -500,7 +497,7 @@ threads_4 execution time: 23.206560399999944
 </div>
 </section>
 <section id="conclusion">
-<h1><span class="section-number">8. </span>Conclusion<a class="headerlink" href="#conclusion" title="Permalink to this heading">#</a></h1>
+<h2><span class="section-number">5.4. </span>Conclusion<a class="headerlink" href="#conclusion" title="Permalink to this heading">#</a></h2>
 <p>Finally, let’s compare speeds of example with the following code.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -578,6 +575,7 @@ threads_4 execution time: 23.206560399999944
 </div>
 <p>You can see that it runs faster when the number of threads is 4. Nevertheless, we don’t need to change this when optimising Numpy, we just need to make sure that MKL has automatically turned on maximum threads to speed up calculations.</p>
 </section>
+</section>
 
     <script type="text/x-thebe-config">
     {
@@ -624,7 +622,7 @@ threads_4 execution time: 23.206560399999944
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><span class="section-number">9. </span>Learn how to use cython</p>
+        <p class="prev-next-title"><span class="section-number">6. </span>Learn how to use cython</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -646,12 +644,11 @@ threads_4 execution time: 23.206560399999944
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#">5. MKL</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#check-if-mkl-already-exists-in-the-system">6. Check if MKL already exists in the system</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#example-of-changing-the-number-of-threads">7. Example of changing the number of threads</a></li>
-<li class="toc-h1 nav-item toc-entry"><a class="reference internal nav-link" href="#conclusion">8. Conclusion</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mkl">5.1. MKL</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#check-if-mkl-already-exists-in-the-system">5.2. Check if MKL already exists in the system</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#example-of-changing-the-number-of-threads">5.3. Example of changing the number of threads</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#conclusion">5.4. Conclusion</a></li>
 </ul>
-
   </nav></div>
 
 </div></div>

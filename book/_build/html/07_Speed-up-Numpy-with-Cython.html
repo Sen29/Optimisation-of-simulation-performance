@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>10. How to speed up Numpy with Cython &#8212; Optimisation of simulation performance</title>
+    <title>7. How to speed up Numpy with Cython &#8212; Optimisation of simulation performance</title>
   
   
   
@@ -64,8 +64,8 @@ const thebe_selector_output = ".output, .cell_output"
     <script>DOCUMENTATION_OPTIONS.pagename = '07_Speed-up-Numpy-with-Cython';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="11. Python code" href="08_Cython_2D%20particles_Sum%20up.html" />
-    <link rel="prev" title="9. Learn how to use cython" href="06_Learn-how-to-use-cython.html" />
+    <link rel="next" title="8. Speed up 2D particles with Cython" href="08_Speed-up-2D-particles-with-Cython.html" />
+    <link rel="prev" title="6. Learn how to use cython" href="06_Learn-how-to-use-cython.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -161,19 +161,15 @@ const thebe_selector_output = ".output, .cell_output"
 <li class="toctree-l1"><a class="reference internal" href="02_Particles-motion-simulation%282D%29.html">2. Two-dimensional particle motion simulation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="03_Particles-motion-simulation%28Lenaard-Jones-potential%29.html">3. Two-dimensional particle motion simulation_Lennard-Jones potential</a></li>
 <li class="toctree-l1"><a class="reference internal" href="04_NumPy-Optimization_Vectorization-and-Broadcasting.html">4. NumPy Optimization: Vectorization and Broadcasting</a></li>
-<li class="toctree-l1"><a class="reference internal" href="05_MKL.html">5. MKL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_MKL.html">5. Trying to change the threads to improve Numpy’s efficiency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_Learn-how-to-use-cython.html">6. Learn how to use cython</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">7. How to speed up Numpy with Cython</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08_Speed-up-2D-particles-with-Cython.html">8. Speed up 2D particles with Cython</a></li>
 
 
 
-<li class="toctree-l1"><a class="reference internal" href="06_Learn-how-to-use-cython.html">9. Learn how to use cython</a></li>
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">10. How to speed up Numpy with Cython</a></li>
-<li class="toctree-l1"><a class="reference internal" href="08_Cython_2D%20particles_Sum%20up.html">11. Python code</a></li>
-
-
-
-<li class="toctree-l1"><a class="reference internal" href="09_Methods%20of%20Inspection.html">15. Line profiler</a></li>
-
-<li class="toctree-l1"><a class="reference internal" href="20_Performance-comparison_N250_Iteration1000.html">17. Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="09_Methods%20of%20Inspection.html">12. Methods of Inspection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="20_Performance-comparison_N250_Iteration1000.html">13. Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)</a></li>
 </ul>
 
     </div>
@@ -367,30 +363,30 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduce">10.1. Introduce</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generating-random-arrays">10.2. Generating random arrays</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-code-for-the-nump">10.3. The code for the Nump</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-code-for-pure-python">10.4. The code for pure Python</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compare">10.4.1. Compare</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduce">7.1. Introduce</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generating-random-arrays">7.2. Generating random arrays</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-code-for-the-nump">7.3. The code for the Nump</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-code-for-pure-python">7.4. The code for pure Python</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compare">7.4.1. Compare</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-code-for-cython">10.5. The code for Cython</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cython">10.5.1. Cython</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">10.5.1.1. Compare</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#check">10.5.1.2. Check</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-code-for-cython">7.5. The code for Cython</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cython">7.5.1. Cython</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">7.5.1.1. Compare</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#check">7.5.1.2. Check</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#add-types">10.5.2. Add Types</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#efficient-indexing-with-memoryviews">10.5.3. Efficient indexing with memoryviews</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tuning-indexing-further">10.5.4. Tuning indexing further</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#declaring-the-numpy-arrays-as-contiguous">10.5.5. Declaring the NumPy arrays as contiguous</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#making-the-function-cleaner-use-of-multiple-data-types">10.5.6. Making the function cleaner &amp; Use of multiple data types</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-multiple-threads">10.5.7. Using multiple threads</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#add-types">7.5.2. Add Types</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#efficient-indexing-with-memoryviews">7.5.3. Efficient indexing with memoryviews</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tuning-indexing-further">7.5.4. Tuning indexing further</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#declaring-the-numpy-arrays-as-contiguous">7.5.5. Declaring the NumPy arrays as contiguous</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#making-the-function-cleaner-use-of-multiple-data-types">7.5.6. Making the function cleaner &amp; Use of multiple data types</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-multiple-threads">7.5.7. Using multiple threads</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#summarize">10.6. Summarize</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#html-file">10.6.1. html file</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">10.6.2. Compare</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#summarize">7.6. Summarize</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#html-file">7.6.1. html file</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">7.6.2. Compare</a></li>
 </ul>
 </li>
 </ul>
@@ -405,9 +401,9 @@ document.write(`
                 <article class="bd-article" role="main">
                   
   <section class="tex2jax_ignore mathjax_ignore" id="how-to-speed-up-numpy-with-cython">
-<h1><span class="section-number">10. </span>How to speed up Numpy with Cython<a class="headerlink" href="#how-to-speed-up-numpy-with-cython" title="Permalink to this heading">#</a></h1>
+<h1><span class="section-number">7. </span>How to speed up Numpy with Cython<a class="headerlink" href="#how-to-speed-up-numpy-with-cython" title="Permalink to this heading">#</a></h1>
 <section id="introduce">
-<h2><span class="section-number">10.1. </span>Introduce<a class="headerlink" href="#introduce" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">7.1. </span>Introduce<a class="headerlink" href="#introduce" title="Permalink to this heading">#</a></h2>
 <p><strong>This article will describe how to use Cython to speed up numpy.</strong></p>
 <p>The original code using Nump is as follows, it truncates array_1 with the interval [2, 10] via np.clip. After that, we do some simple arithmetic with array_1, array_2 and a, b and c, and finally return the result of the calculation.</p>
 <div class="cell docutils container">
@@ -420,7 +416,7 @@ document.write(`
 </div>
 </section>
 <section id="generating-random-arrays">
-<h2><span class="section-number">10.2. </span>Generating random arrays<a class="headerlink" href="#generating-random-arrays" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">7.2. </span>Generating random arrays<a class="headerlink" href="#generating-random-arrays" title="Permalink to this heading">#</a></h2>
 <p><strong>This is the prefix for all the code below, please run this prefix before running the program below.</strong></p>
 <p>It will generate two random two-dimensional arrays and set the values of a,b,c. To make it easier to compare the speed of the runs later, the dimension of the arrays generated here is set larger, to (3000x2000).</p>
 <div class="cell docutils container">
@@ -438,7 +434,7 @@ document.write(`
 </div>
 </section>
 <section id="the-code-for-the-nump">
-<h2><span class="section-number">10.3. </span>The code for the Nump<a class="headerlink" href="#the-code-for-the-nump" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">7.3. </span>The code for the Nump<a class="headerlink" href="#the-code-for-the-nump" title="Permalink to this heading">#</a></h2>
 <p><strong>The following code is executed by numpy.</strong></p>
 <p>Here we name the function compute_np. We use timeit here to show how fast it runs, and to be more precise we calculate the average of its ten runs and record this length of time at the end with compute_np_time.</p>
 <div class="cell docutils container">
@@ -471,7 +467,7 @@ compute_np execution time: 0.05866470000000845
 </div>
 </section>
 <section id="the-code-for-pure-python">
-<h2><span class="section-number">10.4. </span>The code for pure Python<a class="headerlink" href="#the-code-for-pure-python" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">7.4. </span>The code for pure Python<a class="headerlink" href="#the-code-for-pure-python" title="Permalink to this heading">#</a></h2>
 <p><strong>For numpy form, which cannot be translated directly into cython form, we first need to expand it into pure python form.</strong></p>
 <p>Expands the above code into a pure python function. It loops through two dimensions for each element in array_1 and finally combines them together. This means that a new object needs to be assigned to each element used.Let’s call it compute_py</p>
 <div class="cell docutils container">
@@ -518,7 +514,7 @@ compute_py execution time: 10.784624809999878
 </div>
 </div>
 <section id="compare">
-<h3><span class="section-number">10.4.1. </span>Compare<a class="headerlink" href="#compare" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">7.4.1. </span>Compare<a class="headerlink" href="#compare" title="Permalink to this heading">#</a></h3>
 <p>Now, we can compare the speed of these two methods.</p>
 <p>It is clear that the pure python is much slower than numpy.</p>
 <div class="cell docutils container">
@@ -598,9 +594,9 @@ compute_py execution time: 10.784624809999878
 </section>
 </section>
 <section id="the-code-for-cython">
-<h2><span class="section-number">10.5. </span>The code for Cython<a class="headerlink" href="#the-code-for-cython" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">7.5. </span>The code for Cython<a class="headerlink" href="#the-code-for-cython" title="Permalink to this heading">#</a></h2>
 <section id="cython">
-<h3><span class="section-number">10.5.1. </span>Cython<a class="headerlink" href="#cython" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">7.5.1. </span>Cython<a class="headerlink" href="#cython" title="Permalink to this heading">#</a></h3>
 <p>Pure Python is also valid Cython code, so the same code can run in cython</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -663,7 +659,7 @@ compute_cy execution time: 8.321111910000036
 </div>
 </div>
 <section id="id1">
-<h4><span class="section-number">10.5.1.1. </span>Compare<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h4>
+<h4><span class="section-number">7.5.1.1. </span>Compare<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h4>
 <p>Because the C code still does exactly what the Python interpreter does, there’s not much of a difference in speed.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -746,7 +742,7 @@ compute_cy execution time: 8.321111910000036
 </div>
 </section>
 <section id="check">
-<h4><span class="section-number">10.5.1.2. </span>Check<a class="headerlink" href="#check" title="Permalink to this heading">#</a></h4>
+<h4><span class="section-number">7.5.1.2. </span>Check<a class="headerlink" href="#check" title="Permalink to this heading">#</a></h4>
 <p>We can use %%cython -a, to generate html files.</p>
 <p>As shown below, if a line is white, it means that the code generated doesn’t interact with Python, so will run as fast as normal C code. The darker the yellow, the more Python interaction there is in that line. Those yellow lines will usually operate on Python objects, raise exceptions, or do other kinds of higher-level operations than what can easily be translated into simple and fast C code.</p>
 <p>So we can use it to check our code, and it lets us know what lines to improve so that it can run as fast as C.</p>
@@ -754,7 +750,7 @@ compute_cy execution time: 8.321111910000036
 </section>
 </section>
 <section id="add-types">
-<h3><span class="section-number">10.5.2. </span>Add Types<a class="headerlink" href="#add-types" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">7.5.2. </span>Add Types<a class="headerlink" href="#add-types" title="Permalink to this heading">#</a></h3>
 <p>The first thing we need to do is define the type, we named it <strong>compute_cy_t</strong>. This means that the object passed will be converted to a C type.</p>
 <p>With the results we can see that the speed has improved compared to the previous.</p>
 <div class="cell docutils container">
@@ -822,7 +818,7 @@ compute_cy_t execution time: 5.123431210000126
 </div>
 </section>
 <section id="efficient-indexing-with-memoryviews">
-<h3><span class="section-number">10.5.3. </span>Efficient indexing with memoryviews<a class="headerlink" href="#efficient-indexing-with-memoryviews" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">7.5.3. </span>Efficient indexing with memoryviews<a class="headerlink" href="#efficient-indexing-with-memoryviews" title="Permalink to this heading">#</a></h3>
 <p>Adding types does make the code faster, but not nearly as fast as Numpy.</p>
 <p>array_1 and array_2 are still NumPy arrays, so Python objects, and expect Python integers as indexes.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tmp</span> <span class="o">=</span> <span class="n">clip</span><span class="p">(</span><span class="n">array_1</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">],</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>\
@@ -904,7 +900,7 @@ compute_cy_m execution time: 0.037777249999999186
 <p>Here we can see how much faster it has become。</p>
 </section>
 <section id="tuning-indexing-further">
-<h3><span class="section-number">10.5.4. </span>Tuning indexing further<a class="headerlink" href="#tuning-indexing-further" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">7.5.4. </span>Tuning indexing further<a class="headerlink" href="#tuning-indexing-further" title="Permalink to this heading">#</a></h3>
 <p>The array lookups are still slowed down by two factors:</p>
 <p>Bounds checking is performed.</p>
 <p>Negative indices are checked for and handled correctly. The code above is explicitly coded so that it doesn’t use negative indices, and it (hopefully) always access within bounds.</p>
@@ -986,7 +982,7 @@ compute_cy_i execution time: 0.014358759999959147
 </div>
 </section>
 <section id="declaring-the-numpy-arrays-as-contiguous">
-<h3><span class="section-number">10.5.5. </span>Declaring the NumPy arrays as contiguous<a class="headerlink" href="#declaring-the-numpy-arrays-as-contiguous" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">7.5.5. </span>Declaring the NumPy arrays as contiguous<a class="headerlink" href="#declaring-the-numpy-arrays-as-contiguous" title="Permalink to this heading">#</a></h3>
 <p>For extra speed gains, if you know that the NumPy arrays you are providing are contiguous in memory, you can declare the memoryview as contiguous.</p>
 <p>We give an example on an array that has 3 dimensions. If you want to give Cython the information that the data is C-contiguous you have to declare the memoryview like this:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cdef</span> <span class="nb">int</span> <span class="p">[:,:,::</span><span class="mi">1</span><span class="p">]</span> <span class="n">a</span>
@@ -1067,7 +1063,7 @@ compute_cy_c execution time: 0.014614970000002359
 <p>Obviously, this optimization doesn’t work here.</p>
 </section>
 <section id="making-the-function-cleaner-use-of-multiple-data-types">
-<h3><span class="section-number">10.5.6. </span>Making the function cleaner &amp; Use of multiple data types<a class="headerlink" href="#making-the-function-cleaner-use-of-multiple-data-types" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">7.5.6. </span>Making the function cleaner &amp; Use of multiple data types<a class="headerlink" href="#making-the-function-cleaner-use-of-multiple-data-types" title="Permalink to this heading">#</a></h3>
 <p>Declaring types can make your code quite verbose. If you don’t mind Cython inferring the C types of your variables, you can use the following compiler directive at the top of the file. It will save you quite a bit of typing.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">infer_types</span><span class="o">=</span><span class="kc">True</span>
 </pre></div>
@@ -1162,7 +1158,7 @@ compute_cy_mdt execution time: 0.014951370000017051
 </div>
 </section>
 <section id="using-multiple-threads">
-<h3><span class="section-number">10.5.7. </span>Using multiple threads<a class="headerlink" href="#using-multiple-threads" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">7.5.7. </span>Using multiple threads<a class="headerlink" href="#using-multiple-threads" title="Permalink to this heading">#</a></h3>
 <p>Cython has support for OpenMP. It also has some nice wrappers around it, like the function prange().</p>
 <p>The GIL must be released, so this is why we declare our clip() function nogil.</p>
 <p>Here we named it <strong>compute_cy_mt.</strong></p>
@@ -1259,14 +1255,14 @@ compute_cy_mt execution time: 0.04007001999998465
 </section>
 </section>
 <section id="summarize">
-<h2><span class="section-number">10.6. </span>Summarize<a class="headerlink" href="#summarize" title="Permalink to this heading">#</a></h2>
+<h2><span class="section-number">7.6. </span>Summarize<a class="headerlink" href="#summarize" title="Permalink to this heading">#</a></h2>
 <section id="html-file">
-<h3><span class="section-number">10.6.1. </span>html file<a class="headerlink" href="#html-file" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">7.6.1. </span>html file<a class="headerlink" href="#html-file" title="Permalink to this heading">#</a></h3>
 <p>The final html file is as follows. Most of the lines have become lighter in colour, even white.</p>
 <p><img alt="图片描述" src="_images/Speed_up_Numpy_with_Cython_image_02.png" /></p>
 </section>
 <section id="id2">
-<h3><span class="section-number">10.6.2. </span>Compare<a class="headerlink" href="#id2" title="Permalink to this heading">#</a></h3>
+<h3><span class="section-number">7.6.2. </span>Compare<a class="headerlink" href="#id2" title="Permalink to this heading">#</a></h3>
 <p>Finally let’s compare their speeds. If we look at Numpy’s speed as 100%, then the last column is their comparison with the very first Numpy speed.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
@@ -1426,15 +1422,15 @@ compute_cy_mt execution time: 0.04007001999998465
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title"><span class="section-number">9. </span>Learn how to use cython</p>
+        <p class="prev-next-title"><span class="section-number">6. </span>Learn how to use cython</p>
       </div>
     </a>
     <a class="right-next"
-       href="08_Cython_2D%20particles_Sum%20up.html"
+       href="08_Speed-up-2D-particles-with-Cython.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title"><span class="section-number">11. </span>Python code</p>
+        <p class="prev-next-title"><span class="section-number">8. </span>Speed up 2D particles with Cython</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -1456,30 +1452,30 @@ compute_cy_mt execution time: 0.04007001999998465
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduce">10.1. Introduce</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generating-random-arrays">10.2. Generating random arrays</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-code-for-the-nump">10.3. The code for the Nump</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-code-for-pure-python">10.4. The code for pure Python</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compare">10.4.1. Compare</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#introduce">7.1. Introduce</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#generating-random-arrays">7.2. Generating random arrays</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-code-for-the-nump">7.3. The code for the Nump</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-code-for-pure-python">7.4. The code for pure Python</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#compare">7.4.1. Compare</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-code-for-cython">10.5. The code for Cython</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cython">10.5.1. Cython</a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">10.5.1.1. Compare</a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#check">10.5.1.2. Check</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-code-for-cython">7.5. The code for Cython</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cython">7.5.1. Cython</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">7.5.1.1. Compare</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#check">7.5.1.2. Check</a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#add-types">10.5.2. Add Types</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#efficient-indexing-with-memoryviews">10.5.3. Efficient indexing with memoryviews</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tuning-indexing-further">10.5.4. Tuning indexing further</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#declaring-the-numpy-arrays-as-contiguous">10.5.5. Declaring the NumPy arrays as contiguous</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#making-the-function-cleaner-use-of-multiple-data-types">10.5.6. Making the function cleaner &amp; Use of multiple data types</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-multiple-threads">10.5.7. Using multiple threads</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#add-types">7.5.2. Add Types</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#efficient-indexing-with-memoryviews">7.5.3. Efficient indexing with memoryviews</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#tuning-indexing-further">7.5.4. Tuning indexing further</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#declaring-the-numpy-arrays-as-contiguous">7.5.5. Declaring the NumPy arrays as contiguous</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#making-the-function-cleaner-use-of-multiple-data-types">7.5.6. Making the function cleaner &amp; Use of multiple data types</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-multiple-threads">7.5.7. Using multiple threads</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#summarize">10.6. Summarize</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#html-file">10.6.1. html file</a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">10.6.2. Compare</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#summarize">7.6. Summarize</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#html-file">7.6.1. html file</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">7.6.2. Compare</a></li>
 </ul>
 </li>
 </ul>
