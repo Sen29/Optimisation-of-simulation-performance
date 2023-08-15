@@ -1,4 +1,4 @@
-[![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/Sen29/Optimisation-of-simulation-performance/main?urlpath=tree/book/intro.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Sen29/Optimisation-of-simulation-performance/HEAD)
 
 # Optimisation of performance-Particle motion simulation
 
