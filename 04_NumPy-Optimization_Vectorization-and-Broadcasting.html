@@ -1,0 +1,1091 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>4. NumPy Optimization: Vectorization and Broadcasting &#8212; Optimisation of simulation performance</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" href="_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="_static/sphinx-thebe.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '04_NumPy-Optimization_Vectorization-and-Broadcasting';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="5. Trying to change the threads to improve Numpy’s efficiency" href="05_MKL.html" />
+    <link rel="prev" title="3. Two-dimensional particle motion simulation_Lennard-Jones potential" href="03_Particles-motion-simulation%28Lenaard-Jones-potential%29.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="intro.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="intro.html">
+                    Introduction
+                </a>
+            </li>
+        </ul>
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="01_Particles-motion-simulation%281D%29.html">1. One-dimensional particle motion simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02_Particles-motion-simulation%282D%29.html">2. Two-dimensional particle motion simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_Particles-motion-simulation%28Lenaard-Jones-potential%29.html">3. Two-dimensional particle motion simulation_Lennard-Jones potential</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">4. NumPy Optimization: Vectorization and Broadcasting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_MKL.html">5. Trying to change the threads to improve Numpy’s efficiency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_Learn-how-to-use-cython.html">6. Learn how to use cython</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07_Speed-up-Numpy-with-Cython.html">7. How to speed up Numpy with Cython</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08_Speed-up-2D-particles-with-Cython.html">8. Speed up 2D particles with Cython</a></li>
+<li class="toctree-l1"><a class="reference internal" href="09_Methods%20of%20Inspection.html">9. Methods of Inspection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="20_Performance-comparison_N250_Iteration1000.html">10. Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/Sen29/Optimisation-of-simulation-performance/HEAD/v2/gh/executablebooks/jupyter-book/master?urlpath=tree/docs/04_NumPy-Optimization_Vectorization-and-Broadcasting.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch onBinder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/executablebooks/jupyter-book" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/executablebooks/jupyter-book/issues/new?title=Issue%20on%20page%20%2F04_NumPy-Optimization_Vectorization-and-Broadcasting.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/04_NumPy-Optimization_Vectorization-and-Broadcasting.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>NumPy Optimization: Vectorization and Broadcasting</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#python-loop">4.1. python loop</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#vectorization">4.2. Vectorization</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#broadcasting">4.3. Broadcasting</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#concept">4.3.1. Concept</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rules-of-broadcasting">4.3.2. Rules of Broadcasting</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#arrays-with-equal-ranks">4.3.2.1. Arrays with Equal Ranks</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#arrays-with-unequal-ranks">4.3.2.2. Arrays with Unequal Ranks</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#optimisation-of-particle-motion-models">4.4. Optimisation of particle motion models</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#an-overview-of-this-code">4.4.1. An overview of this code</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#optimisation-methods">4.4.2. Optimisation methods</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-comparison">4.4.3. Performance-comparison</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="numpy-optimization-vectorization-and-broadcasting">
+<h1><span class="section-number">4. </span>NumPy Optimization: Vectorization and Broadcasting<a class="headerlink" href="#numpy-optimization-vectorization-and-broadcasting" title="Permalink to this heading">#</a></h1>
+<p>This paper focuses on the optimisation of particle motion models, so it is mainly concerned with vectorisation and broadcasting in numpy optimisation. There are of course many other Numpy optimisations, but I won’t go into them here.</p>
+<section id="python-loop">
+<h2><span class="section-number">4.1. </span>python loop<a class="headerlink" href="#python-loop" title="Permalink to this heading">#</a></h2>
+<p>Suppose the code contains a looping section for a list, and since python is dynamically typed, this means that it doesn’t know what types of objects are present in the list (whether integers, strings or floats).</p>
+<p>As a result, Python must perform a series of checks at each iteration, such as determining the type of a variable, resolving its scope, checking for any invalid operations, etc. This causes Python loops to be relatively slow.</p>
+<p>If we compare with C. In C, arrays are allowed to consist of only one data type, which the compiler knows about in advance.</p>
+<p>Of course there are many reasons why Python loops are relatively slow, but this is one of the main ones.</p>
+</section>
+<section id="vectorization">
+<h2><span class="section-number">4.2. </span>Vectorization<a class="headerlink" href="#vectorization" title="Permalink to this heading">#</a></h2>
+<p>In fact, most of the functions called in Python using NumPy are simply wrappers around the underlying code in C, where most of the heavy lifting happens. We can take advantage of this to speed up our code.</p>
+<p>NumPy allows arrays to have only a single datatype and to store the data internally in contiguous blocks of memory, which allows NumPy to delegate most of the operations on such arrays to the underlying optimised pre-compiled C code. If NumPy could move the execution of loops to C, this would be much more efficient.</p>
+<p>For example, for list_a and list_b below, suppose we need to multiply their corresponding elements, so there is a for loop here.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">list_a</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">14</span><span class="p">,</span><span class="mi">16</span><span class="p">,</span><span class="mi">18</span><span class="p">,</span><span class="mi">20</span><span class="p">]</span>
+<span class="n">list_b</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">13</span><span class="p">,</span><span class="mi">15</span><span class="p">,</span><span class="mi">17</span><span class="p">,</span><span class="mi">19</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">multiply_py</span><span class="p">(</span><span class="n">list_a</span><span class="p">,</span> <span class="n">list_b</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">list_a</span><span class="p">)):</span>
+        <span class="n">list_a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">*</span> <span class="n">list_b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Then the speed at which this function is run 100000 times and repeated 5 times each time is:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">timeit</span> -n 100000 -r 5 multiply_py(list_a, list_b)
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>1.2 µs ± 117 ns per loop (mean ± std. dev. of 5 runs, 100000 loops each)
+</pre></div>
+</div>
+</div>
+</div>
+<p>However, if use NumPy arrays, we don’t need to write a loop, as shown below.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">arr_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">list_a</span><span class="p">)</span>
+<span class="n">arr_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">list_b</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">multiply_np</span><span class="p">(</span><span class="n">arr_a</span><span class="p">,</span> <span class="n">arr_b</span><span class="p">):</span>
+    <span class="n">arr_a</span> <span class="o">*</span> <span class="n">arr_b</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">timeit</span> -n 100000 -r 5 multiply_np(arr_a, arr_b)
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>612 ns ± 38.5 ns per loop (mean ± std. dev. of 5 runs, 100000 loops each)
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can see that the multiply_np function is much faster.</p>
+<p>Notice this can be only done as the array enforces the elements of the array to be of the same kind. Otherwise, it would not be possible to convert the Python data types to native C ones to be executed under the hood.</p>
+</section>
+<section id="broadcasting">
+<h2><span class="section-number">4.3. </span>Broadcasting<a class="headerlink" href="#broadcasting" title="Permalink to this heading">#</a></h2>
+<section id="concept">
+<h3><span class="section-number">4.3.1. </span>Concept<a class="headerlink" href="#concept" title="Permalink to this heading">#</a></h3>
+<p>Broadcasting can help us vectorise loops of arrays of dissimilar sizes.</p>
+<p>Take the following equation as an example.</p>
+<p>arr_1 is a matrix containing 3 rows and 4 columns, suppose I want to make each column in arr_1 plus a column vector.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{bmatrix}
+0&amp;1&amp;2&amp;3\\
+4&amp;5&amp;6&amp;7\\
+8&amp;9&amp;10&amp;11\\
+\end{bmatrix}
++
+\begin{bmatrix}
+5\\
+6\\
+7\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+5&amp;6&amp;7&amp;8\\
+10&amp;11&amp;12&amp;13\\
+15&amp;16&amp;17&amp;18\\
+\end{bmatrix}
+\end{split}\]</div>
+<p>We translate it into code. As below, we need to follow the shape of arr_1 and do 4 loops to add arr_2 to each of its columns. This will make it inefficient due to the presence of loops.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">arr_1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">arr_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">])</span>
+
+<span class="k">def</span> <span class="nf">add_py</span><span class="p">(</span><span class="n">arr_1</span><span class="p">,</span><span class="n">arr_2</span><span class="p">):</span>
+    <span class="n">num_columns</span> <span class="o">=</span> <span class="n">arr_1</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_columns</span><span class="p">):</span>
+        <span class="n">arr_1</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="n">arr_2</span>
+    <span class="k">return</span> <span class="n">arr_1</span>
+
+<span class="n">add_py</span><span class="p">(</span><span class="n">arr_1</span><span class="p">,</span><span class="n">arr_2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[ 5,  6,  7,  8],
+       [10, 11, 12, 13],
+       [15, 16, 17, 18]])
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">timeit</span> -n 100000 -r 5 add_py(arr_1,arr_2)
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>6.8 µs ± 272 ns per loop (mean ± std. dev. of 5 runs, 100000 loops each)
+</pre></div>
+</div>
+</div>
+</div>
+<p>We can make a matrix with the same size and the same columns as the original array, so that each column can be added at the same time to avoid loops.</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{bmatrix}
+0&amp;1&amp;2&amp;3\\
+4&amp;5&amp;6&amp;7\\
+8&amp;9&amp;10&amp;11\\
+\end{bmatrix}
++
+\begin{bmatrix}
+5&amp;5&amp;5&amp;5\\
+6&amp;6&amp;6&amp;6\\
+7&amp;7&amp;7&amp;7\\
+\end{bmatrix}
+=
+\begin{bmatrix}
+5&amp;6&amp;7&amp;8\\
+10&amp;11&amp;12&amp;13\\
+15&amp;16&amp;17&amp;18\\
+\end{bmatrix}
+\end{split}\]</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">arr_1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">arr_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">])</span>
+
+<span class="k">def</span> <span class="nf">add_np</span><span class="p">(</span><span class="n">arr_1</span><span class="p">,</span><span class="n">arr_2</span><span class="p">):</span>
+    <span class="n">num_columns</span> <span class="o">=</span> <span class="n">arr_1</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">add_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">arr_2</span><span class="p">,]</span> <span class="o">*</span> <span class="n">num_columns</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+    <span class="n">arr_1</span> <span class="o">+=</span> <span class="n">add_matrix</span>
+    <span class="k">return</span> <span class="n">arr_1</span>
+
+<span class="n">add_np</span><span class="p">(</span><span class="n">arr_1</span><span class="p">,</span><span class="n">arr_2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[ 5,  6,  7,  8],
+       [10, 11, 12, 13],
+       [15, 16, 17, 18]])
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">timeit</span> -n 100000 -r 5 add_np(arr_1,arr_2)
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>4 µs ± 86.3 ns per loop (mean ± std. dev. of 5 runs, 100000 loops each)
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="rules-of-broadcasting">
+<h3><span class="section-number">4.3.2. </span>Rules of Broadcasting<a class="headerlink" href="#rules-of-broadcasting" title="Permalink to this heading">#</a></h3>
+<p>This involves an important definition: the rank of the array in NumPy. The rank is the total number of dimensions of a NumPy array. For example, an array of shape (3, 4) has a rank of 2, and an array of shape (3, 4, 3) has a rank of 3.</p>
+<ol class="arabic simple">
+<li><p>To deem which two arrays are suitable for operations, NumPy compares the shape of the two arrays dimension-by-dimension starting from the trailing dimensions of the arrays working it’s way forward.  (from right to left)</p></li>
+<li><p>Two dimensions are said to be compatible if both of them are equal, or either one of them is 1.</p></li>
+<li><p>If both the dimensions are unequal and neither of them is 1, then NumPy will throw an error and halt.</p></li>
+</ol>
+<section id="arrays-with-equal-ranks">
+<h4><span class="section-number">4.3.2.1. </span>Arrays with Equal Ranks<a class="headerlink" href="#arrays-with-equal-ranks" title="Permalink to this heading">#</a></h4>
+<p>For the following two cases we can try with code.</p>
+<p><img alt="图片描述" src="_images/ArrayswithEqualRanks_1.png" /></p>
+<p>For the case on the left, it goes through without throwing an error.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">arr_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="c1"># random array of shape (3,4,6,2)</span>
+<span class="n">arr_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> 
+
+<span class="n">arr_a</span> <span class="o">+</span> <span class="n">arr_b</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>For the case on the right, it throws an error.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">arr_a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="c1"># random array of shape (3,4,6,2)</span>
+<span class="n">arr_b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="n">arr_a</span> <span class="o">+</span> <span class="n">arr_b</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="arrays-with-unequal-ranks">
+<h4><span class="section-number">4.3.2.2. </span>Arrays with Unequal Ranks<a class="headerlink" href="#arrays-with-unequal-ranks" title="Permalink to this heading">#</a></h4>
+<p>For the following three cases.</p>
+<p><img alt="图片描述" src="_images/ArrayswithUnequalRanks_1.png" /></p>
+<p>In order to compare two such arrays, Numpy appends forward dimensions of size 1 to the smaller array so that it has a rank equal to the larger array. So all the comparisons above can be treated as (this is just a way to visualize what NumPy is doing, there is no appending internally):</p>
+<p><img alt="图片描述" src="_images/ArrayswithUnequalRanks_2.png" /></p>
+</section>
+</section>
+</section>
+<section id="optimisation-of-particle-motion-models">
+<h2><span class="section-number">4.4. </span>Optimisation of particle motion models<a class="headerlink" href="#optimisation-of-particle-motion-models" title="Permalink to this heading">#</a></h2>
+<section id="an-overview-of-this-code">
+<h3><span class="section-number">4.4.1. </span>An overview of this code<a class="headerlink" href="#an-overview-of-this-code" title="Permalink to this heading">#</a></h3>
+<p>Firstly, I need to reintroduce our original python code again.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">simulation_py</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">iterations</span><span class="p">):</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">particle_initial_position</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="c1">#    n = len(p)  # number of particles</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iterations</span><span class="p">):</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>  <span class="c1"># forces from all other particles</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
+                    <span class="n">r</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>   <span class="c1">#distence between particles,it&#39;s a vector.</span>
+                    <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>   <span class="c1">#Converting distances to scalars</span>
+                    
+                    <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">):</span>
+                        <span class="n">unit_vector_nan</span> <span class="o">=</span> <span class="n">r</span> <span class="o">/</span> <span class="n">dist</span>    <span class="c1">#unit vector,it&#39;s direction.</span>
+                    <span class="n">unit_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">unit_vector_nan</span><span class="p">)</span>
+                    
+                    <span class="n">epsilon</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># parameter of LJ-potential</span>
+                    <span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.1</span>  <span class="c1"># parameter of LJ-potential</span>
+                    
+                    <span class="c1">#Bringing the distance (scalar) and the parameters into the LJ equation gives the magnitude of the force (scalar)</span>
+                    <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">):</span>
+                        <span class="n">force_nan</span> <span class="o">=</span> <span class="mi">48</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="mi">13</span><span class="p">)</span> <span class="o">-</span> <span class="mi">24</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+                    <span class="n">force</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">force_nan</span><span class="p">)</span>
+                    
+                    <span class="n">fs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="n">force</span> <span class="o">*</span> <span class="n">unit_vector</span>    <span class="c1">#Converting forces into vectors</span>
+
+        <span class="n">x_delta</span> <span class="o">=</span> <span class="n">fs</span> <span class="o">/</span> <span class="mi">1</span> <span class="o">*</span> <span class="mf">0.00001</span>    <span class="c1">#Bring the force(vector) into the displacement equation and calculate the displacement(vector).</span>
+
+        <span class="n">p</span> <span class="o">+=</span> <span class="n">x_delta</span>    <span class="c1">#update the position of particles</span>
+
+<span class="c1">#    print(&quot;P({}):\n&quot;.format(iterations), p)   #plot finally result</span>
+
+    <span class="k">return</span> <span class="n">p</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We do a number of things here.</p>
+<p>First, the coordinates of the particles are subtracted one by one to find the distance between the particles “r” (vector), which is then converted to a scalar “dist” and decomposed into a direction vector “unit_vector”.</p>
+<p>Then, we take the “dist” into the LJ equation to find the magnitude of the force “force”, and multiply the force by the direction vector “unit_vector” to convert it into a vector.</p>
+<p>Finally, we take this force into the displacement equation to find the displacement, and finally use it to update the original coordinates to get the new position of the particle after Δt time.</p>
+<p>We give it an input: 50 particles and 100 iterations, and finally calculate its execution time:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">timeit</span>
+
+<span class="c1"># Generate n initial random particles</span>
+<span class="k">def</span> <span class="nf">particle_initial_position</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">conflict</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+                <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">distance</span> <span class="o">&lt;=</span> <span class="mf">0.1</span><span class="p">:</span>
+                    <span class="n">conflict</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">conflict</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">timeit</span>
+<span class="n">compute_time_py</span> <span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">simulation_py</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">number</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;simulate_py execution time:&quot;</span><span class="p">,</span> <span class="n">compute_time_py</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>simulate_py execution time: 23.53331849999995
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="optimisation-methods">
+<h3><span class="section-number">4.4.2. </span>Optimisation methods<a class="headerlink" href="#optimisation-methods" title="Permalink to this heading">#</a></h3>
+<p>In this process we use a For loop, because we need to go through the elements of the particle coordinate matrix to find the distance between the coordinates, and then use the distance to calculate the force and displacement afterwards.</p>
+<p>For example, we assume that there are 3 particles P1, P2, P3 and their coordinates are P1(3, 5), P2(2, 4), P3(7, 6).</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{bmatrix}
+(3&amp;5)\\
+(2&amp;4)\\
+(7&amp;6)\\
+\end{bmatrix}\end{split}\]</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">fixed_position</span><span class="p">():</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span>
+
+<span class="n">fixed_position</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([[3., 5.],
+       [2., 4.],
+       [7., 6.]])
+</pre></div>
+</div>
+</div>
+</div>
+<p>Firstly, for the first level of the loop we need to do this:</p>
+<p>The distance from P1 to P1:
+$<span class="math notranslate nohighlight">\(\begin{bmatrix}
+(3&amp;5)\\
+\end{bmatrix}-\begin{bmatrix}
+(3&amp;5)\\
+\end{bmatrix}=\begin{bmatrix}
+(0&amp;0)\\
+\end{bmatrix}\)</span>$</p>
+<p>The distance from P1 to P2:
+$<span class="math notranslate nohighlight">\(\begin{bmatrix}
+(3&amp;5)\\
+\end{bmatrix}-\begin{bmatrix}
+(2&amp;4)\\
+\end{bmatrix}=\begin{bmatrix}
+(1&amp;1)\\
+\end{bmatrix}\)</span>$</p>
+<p>The distance from P1 to P3:
+$<span class="math notranslate nohighlight">\(\begin{bmatrix}
+(3&amp;5)\\
+\end{bmatrix}-\begin{bmatrix}
+(7&amp;6)\\
+\end{bmatrix}=\begin{bmatrix}
+(-4&amp;-1)\\
+\end{bmatrix}\)</span>$</p>
+<p>But we can use Numpy’s “broadcasting” to put this process into one matrix and compute it at the same time, which eliminates this layer of loop and makes it more performant. Like this:
+$<span class="math notranslate nohighlight">\(\begin{bmatrix}
+(3&amp;5)\\
+\end{bmatrix}-\begin{bmatrix}
+(3&amp;5)\\
+(2&amp;4)\\
+(7&amp;6)\\
+\end{bmatrix}=\begin{bmatrix}
+(0&amp;0)\\
+(1&amp;1)\\
+(-4&amp;-1)\\
+\end{bmatrix}\)</span>$</p>
+<p>By the same principle, we can put the distances of the other particles to P1, P2 and P3 in the same matrix as follows:</p>
+<p><img alt="图片描述" src="_images/loopmatrixs_1.png" /></p>
+<p>then, we split it and it became:</p>
+<p><img alt="图片描述" src="_images/loopmatrixs_2.png" /></p>
+<p>In the code, we add a dimension to the original <code class="docutils literal notranslate"><span class="pre">r</span> <span class="pre">=</span> <span class="pre">p[j]</span> <span class="pre">-</span> <span class="pre">p[i]</span></code>, changing it to <code class="docutils literal notranslate"><span class="pre">rvs</span> <span class="pre">=</span> <span class="pre">(p[:,</span> <span class="pre">np.newaxis,</span> <span class="pre">:]</span> <span class="pre">-</span> <span class="pre">p[np.newaxis,</span> <span class="pre">:,</span> <span class="pre">:])</span></code>. So, the subsequent calculations are carried out as usual using this matrix with one more dimension, until we calculate the combined force, we need to add together the partial forces in the matrix <code class="docutils literal notranslate"><span class="pre">f_i</span> <span class="pre">=</span> <span class="pre">fs.sum(axis=1)</span></code>.</p>
+<p>The modified code is as follows:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">seterr</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">simulate_np</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">iterations</span><span class="p">):</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">particle_initial_position</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iterations</span><span class="p">):</span>
+        <span class="n">rvs</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span>   <span class="c1">#distence between particles,it&#39;s a vector.</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rvs</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>    <span class="c1">#Converting distances to scalars</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>  <span class="c1"># forces from all other particles</span>
+
+        <span class="n">dist_i</span> <span class="o">=</span> <span class="n">dist</span><span class="p">[:,</span> <span class="p">:]</span>
+        <span class="n">rvs_i</span> <span class="o">=</span> <span class="n">rvs</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:]</span>
+
+        <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">):</span>
+            <span class="n">unit_vectors_nan</span> <span class="o">=</span> <span class="n">rvs_i</span> <span class="o">/</span> <span class="n">dist_i</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="n">unit_vectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">unit_vectors_nan</span><span class="p">)</span>
+
+        <span class="n">dist_new</span> <span class="o">=</span> <span class="n">dist_i</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="n">epsilon</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># parameter of LJ-potential</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.1</span>  <span class="c1"># parameter of LJ-potential</span>
+        <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">):</span>
+            <span class="n">fs_nan</span> <span class="o">=</span> <span class="mi">48</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">dist_new</span><span class="p">,</span> <span class="mi">13</span><span class="p">)</span><span class="o">-</span><span class="mi">24</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">dist_new</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">fs_nan</span><span class="p">)</span><span class="o">*</span><span class="n">unit_vectors</span>
+                
+        <span class="n">f_i</span> <span class="o">=</span> <span class="n">fs</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">x_delta</span> <span class="o">=</span> <span class="n">f_i</span> <span class="o">/</span> <span class="mi">1</span> <span class="o">*</span> <span class="mf">0.00001</span>
+        
+        <span class="n">p</span> <span class="o">+=</span> <span class="n">x_delta</span>    <span class="c1">#update the position of particles</span>
+
+    <span class="c1">#print(&quot;P({}):\n&quot;.format(iterations), p)    # plot finally result</span>
+    <span class="k">return</span> <span class="n">p</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>We give it an input: 50 particles and 100 iterations, and finally calculate its execution time:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">compute_time_np</span> <span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">simulate_np</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">number</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;simulate_np execution time:&quot;</span><span class="p">,</span> <span class="n">compute_time_np</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>simulate_np execution time: 0.09211789999972098
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="performance-comparison">
+<h3><span class="section-number">4.4.3. </span>Performance-comparison<a class="headerlink" href="#performance-comparison" title="Permalink to this heading">#</a></h3>
+<p>Finally, let’s create a table to compare how much the speed has increased.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">HTML</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;Methods&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;Python&#39;</span><span class="p">,</span> <span class="s1">&#39;Numpy&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;Excution time(s)&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">compute_time_py</span><span class="p">,</span> <span class="n">compute_time_np</span><span class="p">],</span>
+    <span class="s1">&#39;Speed up&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">compute_time_py</span><span class="o">/</span><span class="n">compute_time_np</span><span class="p">]</span>
+<span class="p">}</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># Creating style functions</span>
+<span class="k">def</span> <span class="nf">add_border</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s1">&#39;border: 1px solid black&#39;</span>
+
+<span class="c1"># Applying style functions to data boxes</span>
+<span class="n">styled_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">applymap</span><span class="p">(</span><span class="n">add_border</span><span class="p">)</span>
+
+<span class="c1"># Defining CSS styles</span>
+<span class="n">table_style</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s1">&#39;selector&#39;</span><span class="p">:</span> <span class="s1">&#39;table&#39;</span><span class="p">,</span> <span class="s1">&#39;props&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;border-collapse&#39;</span><span class="p">,</span> <span class="s1">&#39;collapse&#39;</span><span class="p">)]},</span>
+    <span class="p">{</span><span class="s1">&#39;selector&#39;</span><span class="p">:</span> <span class="s1">&#39;th, td&#39;</span><span class="p">,</span> <span class="s1">&#39;props&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;border&#39;</span><span class="p">,</span> <span class="s1">&#39;1px solid black&#39;</span><span class="p">)]}</span>
+<span class="p">]</span>
+
+<span class="c1"># Adding styles to stylised data boxes</span>
+<span class="n">styled_df</span><span class="o">.</span><span class="n">set_table_styles</span><span class="p">(</span><span class="n">table_style</span><span class="p">)</span>
+
+<span class="c1"># Displaying stylised data boxes in Jupyter Notebook</span>
+<span class="n">HTML</span><span class="p">(</span><span class="n">styled_df</span><span class="o">.</span><span class="n">to_html</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><style type="text/css">
+#T_05d2d table {
+  border-collapse: collapse;
+}
+#T_05d2d th {
+  border: 1px solid black;
+}
+#T_05d2d  td {
+  border: 1px solid black;
+}
+#T_05d2d_row0_col0, #T_05d2d_row0_col1, #T_05d2d_row0_col2, #T_05d2d_row1_col0, #T_05d2d_row1_col1, #T_05d2d_row1_col2 {
+  border: 1px solid black;
+}
+</style>
+<table id="T_05d2d">
+  <thead>
+    <tr>
+      <th class="blank level0" >&nbsp;</th>
+      <th id="T_05d2d_level0_col0" class="col_heading level0 col0" >Methods</th>
+      <th id="T_05d2d_level0_col1" class="col_heading level0 col1" >Excution time(s)</th>
+      <th id="T_05d2d_level0_col2" class="col_heading level0 col2" >Speed up</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="T_05d2d_level0_row0" class="row_heading level0 row0" >0</th>
+      <td id="T_05d2d_row0_col0" class="data row0 col0" >Python</td>
+      <td id="T_05d2d_row0_col1" class="data row0 col1" >23.533318</td>
+      <td id="T_05d2d_row0_col2" class="data row0 col2" >1.000000</td>
+    </tr>
+    <tr>
+      <th id="T_05d2d_level0_row1" class="row_heading level0 row1" >1</th>
+      <td id="T_05d2d_row1_col0" class="data row1 col0" >Numpy</td>
+      <td id="T_05d2d_row1_col1" class="data row1 col1" >0.092118</td>
+      <td id="T_05d2d_row1_col2" class="data row1 col2" >255.469550</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="03_Particles-motion-simulation%28Lenaard-Jones-potential%29.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title"><span class="section-number">3. </span>Two-dimensional particle motion simulation_Lennard-Jones potential</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="05_MKL.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title"><span class="section-number">5. </span>Trying to change the threads to improve Numpy’s efficiency</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#python-loop">4.1. python loop</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#vectorization">4.2. Vectorization</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#broadcasting">4.3. Broadcasting</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#concept">4.3.1. Concept</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#rules-of-broadcasting">4.3.2. Rules of Broadcasting</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#arrays-with-equal-ranks">4.3.2.1. Arrays with Equal Ranks</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#arrays-with-unequal-ranks">4.3.2.2. Arrays with Unequal Ranks</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#optimisation-of-particle-motion-models">4.4. Optimisation of particle motion models</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#an-overview-of-this-code">4.4.1. An overview of this code</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#optimisation-methods">4.4.2. Optimisation methods</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-comparison">4.4.3. Performance-comparison</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Sen Liu
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2022.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
