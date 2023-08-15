@@ -1,5 +1,5 @@
-python==3.9.13
-numpy==1.21.5
-cython==0.29.33
-numba==0.55.1
-matplotlib==3.5.2
+python
+numpy
+cython
+numba
+matplotlib
