@@ -1,0 +1,2084 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>10. Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C) &#8212; Optimisation of simulation performance</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" href="_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="_static/sphinx-thebe.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '21_Comparison';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="9. Methods of Inspection" href="09_Methods%20of%20Inspection.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="intro.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="intro.html">
+                    Introduction
+                </a>
+            </li>
+        </ul>
+        <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="01_Particles-motion-simulation%281D%29.html">1. One-dimensional particle motion simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02_Particles-motion-simulation%282D%29.html">2. Two-dimensional particle motion simulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_Particles-motion-simulation%28Lenaard-Jones-potential%29.html">3. Two-dimensional particle motion simulation_Lennard-Jones potential</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04_NumPy-Optimization_Vectorization-and-Broadcasting.html">4. NumPy Optimization: Vectorization and Broadcasting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_MKL.html">5. Trying to change the threads to improve Numpy’s efficiency</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_Learn-how-to-use-cython.html">6. Learn how to use cython</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07_Speed-up-Numpy-with-Cython.html">7. How to speed up Numpy with Cython</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08_Speed-up-2D-particles-with-Cython.html">8. Speed up 2D particles with Cython</a></li>
+<li class="toctree-l1"><a class="reference internal" href="09_Methods%20of%20Inspection.html">9. Methods of Inspection</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">10. Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://mybinder.org/v2/gh/Sen29/Optimisation-of-simulation-performance/HEAD/v2/gh/Sen29/Optimisation-of-simulation-performance/main?urlpath=tree/book/21_Comparison.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch onBinder"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img src="_static/images/logo_binder.svg">
+  </span>
+<span class="btn__text-container">Binder</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/Sen29/Optimisation-of-simulation-performance" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/Sen29/Optimisation-of-simulation-performance/issues/new?title=Issue%20on%20page%20%2F21_Comparison.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/21_Comparison.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Performance comparison (Python & Numpy & Numba & Cython & C)</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#python-py">10.1. Python (Py)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#py-code">10.1.1. Py code</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-for-py">10.1.2. Plot for Py</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-py">10.1.3. Execution time for Py</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#numpy-np">10.2. Numpy (Np)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#np-code-num-of-threads-4">10.2.1. Np code(Num. of threads=4)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-np-num-of-threads-4">10.2.2. Execution time for Np (Num. of threads=4)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#np-code-num-of-threads-1">10.2.3. Np code (Num. of threads=1)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-np-num-of-threads-1">10.2.4. Execution time for Np (Num. of threads=1)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#numba-nb">10.3. Numba (Nb)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nb-code-num-of-threads-1">10.3.1. Nb code  (Num. of threads=1)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-nb-num-of-threads-1">10.3.2. Execution time for Nb  (Num. of threads=1)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nb-code-num-of-threads-4">10.3.3. Nb code  (Num. of threads=4)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-nb-num-of-threads-4">10.3.4. Execution time for Nb  (Num. of threads=4)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cython-cy">10.4. Cython (Cy)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cy-code-num-of-threads-1">10.4.1. Cy code   (Num. of threads=1)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-cy-num-of-threads-1">10.4.2. Execution time for Cy   (Num. of threads=1)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cy-code-num-of-threads-4">10.4.3. Cy code   (Num. of threads=4)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-cy-num-of-threads-4">10.4.4. Execution time for Cy   (Num. of threads=4)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c">10.5. C</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#c-code-num-of-threads-1">10.5.1. C code  (Num. of threads=1)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-c-num-of-threads-1">10.5.2. Execution time for C (Num. of threads=1)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#c-code-num-of-threads-4">10.5.3. C code  (Num. of threads=4)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-c-num-of-threads-4">10.5.4. Execution time for C (Num. of threads=4)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-comparison">10.6. Performance-comparison</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="performance-comparison-python-numpy-numba-cython-c">
+<h1><span class="section-number">10. </span>Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)<a class="headerlink" href="#performance-comparison-python-numpy-numba-cython-c" title="Permalink to this heading">#</a></h1>
+<p>The following program is a simulation of particle motion with the lenaard-jones potential, with n controlling the number of particles and iterations controlling the number of iterations.
+The article concludes with a comparison of the performance of the Python version, the vectorisation optimised version using Numpy, the optimised version using Cython, and the version using C.</p>
+<p>Model of particle motion: the forces between particles utilise the Lennard Jones potential, whereby particles repel each other when they are less widely spaced and attract each other when they are more widely spaced.</p>
+<section id="python-py">
+<h2><span class="section-number">10.1. </span>Python (Py)<a class="headerlink" href="#python-py" title="Permalink to this heading">#</a></h2>
+<p>The code below uses the Python language and is the original baseline version without any optimisations.</p>
+<section id="py-code">
+<h3><span class="section-number">10.1.1. </span>Py code<a class="headerlink" href="#py-code" title="Permalink to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">timeit</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># Used to randomly generate the initial positions of &quot;n&quot; particles.</span>
+<span class="c1"># The horizontal and vertical coordinates of the generated particles are within (0, 2).</span>
+<span class="c1"># Where a for loop is used to ensure that </span>
+<span class="c1"># the distance between particles is greater than 0.1</span>
+<span class="c1"># to avoid confusion due to particles being too close together.</span>
+
+<span class="k">def</span> <span class="nf">particle_initial_position</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>    <span class="c1">#Make sure that the randomly generated particles are the same each time to make it easy to compare results.</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span>
+    
+    <span class="c1">#Ensure that the distance between particles is greater than 0.1</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">conflict</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+                <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">distance</span> <span class="o">&lt;=</span> <span class="mf">0.1</span><span class="p">:</span>
+                    <span class="n">conflict</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">conflict</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">p</span>
+
+
+
+<span class="c1"># main function,</span>
+<span class="c1"># &quot;n&quot; is the number of particles,</span>
+<span class="c1"># &quot;iterations&quot; is the total number of iterations (how many Δt are computed), </span>
+<span class="c1"># and &quot;show_plot&quot; controls whether or not to display the particle motion trajectories in the plot.</span>
+
+<span class="k">def</span> <span class="nf">simulate_py</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">show_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span> 
+<span class="c1">#    p = particle_initial_position(n)    # Call the initial position of the &quot;n&quot; particles</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iterations</span><span class="p">):</span>    <span class="c1"># iterative loop</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>  <span class="c1"># forces from all other particles</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
+                    <span class="n">r</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>    <span class="c1">#the distance between particles, &quot;r&quot; is a vector.</span>
+                    <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">r</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>    <span class="c1">#the distance between particles, &quot;dist&quot; is a scalar.</span>
+                    
+                    <span class="c1"># calculate the unit vector, i.e. to obtain the direction of the force</span>
+                    <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">):</span>    <span class="c1"># ignore cases where the denominator is zero</span>
+                        <span class="n">unit_vector_nan</span> <span class="o">=</span> <span class="n">r</span> <span class="o">/</span> <span class="n">dist</span>    
+                    <span class="n">unit_vector</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">unit_vector_nan</span><span class="p">)</span>
+                    
+                    <span class="c1"># The Lennar-Jones potential&#39;s formula on force.(scalar)</span>
+                    <span class="n">epsilon</span> <span class="o">=</span> <span class="mi">1</span>    <span class="c1"># Parameters in the potential energy equation</span>
+                    <span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.1</span>    <span class="c1"># Parameters in the potential energy equation</span>
+                    <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">):</span> 
+                        <span class="n">force_nan</span> <span class="o">=</span> <span class="mi">48</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="mi">13</span><span class="p">)</span> <span class="o">-</span> <span class="mi">24</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+                    <span class="n">force</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">force_nan</span><span class="p">)</span>
+                    <span class="n">fs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="n">force</span> <span class="o">*</span> <span class="n">unit_vector</span>    <span class="c1">#Transformation into vectors</span>
+        
+        <span class="c1"># calculating the displacement at time Δt</span>
+        <span class="n">x_delta</span> <span class="o">=</span> <span class="n">fs</span> <span class="o">/</span> <span class="mi">1</span> <span class="o">*</span> <span class="mf">0.00001</span>    <span class="c1"># Δt is 0.00001.</span>
+        
+        <span class="c1"># Get the new position of particle &quot;p&quot; after displacement generation</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">update_position</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">x_delta</span><span class="p">)</span>
+        
+        <span class="c1"># Plot</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">p</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="s1">&#39;orange&#39;</span><span class="p">]</span>    <span class="c1"># Colour the particles in plot</span>
+        <span class="k">if</span> <span class="n">show_plot</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_</span> <span class="o">%</span> <span class="mi">50</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">update_plot</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span><span class="n">colors</span><span class="p">)</span>
+                
+    <span class="c1"># plot finally result</span>
+<span class="c1">#    print(&quot;P({}): &quot;.format(iterations), p)</span>
+<span class="c1">#    return p</span>
+
+
+
+<span class="c1"># is used to update the position of the particle.</span>
+<span class="c1"># &quot;delta_r&quot; is the displacement produced in Δt,</span>
+<span class="c1"># &quot;p&quot; is the position of the particle,</span>
+<span class="c1"># &quot;new_p&quot; is the position of the particle after the displacement has occurred</span>
+
+<span class="k">def</span> <span class="nf">update_position</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">delta_r</span><span class="p">):</span>
+    <span class="n">new_pos</span> <span class="o">=</span> <span class="n">p</span> <span class="o">+</span> <span class="n">delta_r</span>
+    <span class="k">return</span> <span class="n">new_pos</span>
+
+
+
+<span class="c1"># for plot particles</span>
+<span class="k">def</span> <span class="nf">update_plot</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span><span class="n">color</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+    <span class="n">xpos</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">ypos</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+    <span class="n">N_color</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xpos</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ypos</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="n">N_color</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">left</span><span class="o">=-</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">2.1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">bottom</span><span class="o">=-</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">2.1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.0001</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="plot-for-py">
+<h3><span class="section-number">10.1.2. </span>Plot for Py<a class="headerlink" href="#plot-for-py" title="Permalink to this heading">#</a></h3>
+<p>Show the trajectory of the particle in the diagram:</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span>
+<span class="n">simulate_py</span><span class="p">(</span><span class="mi">250</span><span class="p">,</span> <span class="mi">1000</span><span class="p">,</span> <span class="n">show_plot</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Using matplotlib backend: QtAgg
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="execution-time-for-py">
+<h3><span class="section-number">10.1.3. </span>Execution time for Py<a class="headerlink" href="#execution-time-for-py" title="Permalink to this heading">#</a></h3>
+<p>Calculating execution time for python versions:</p>
+<p>(Execution time is “compute_time_py”)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">p</span> <span class="o">=</span> <span class="n">particle_initial_position</span><span class="p">(</span><span class="mi">250</span><span class="p">)</span>
+
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="n">simulate_py</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+
+<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="n">compute_time_py</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;simulate_py execution time:&quot;</span><span class="p">,</span> <span class="n">compute_time_py</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>simulate_py execution time: 5597.128479003906
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="numpy-np">
+<h2><span class="section-number">10.2. </span>Numpy (Np)<a class="headerlink" href="#numpy-np" title="Permalink to this heading">#</a></h2>
+<p>The following code is optimised for vectorisation with numpy.</p>
+<section id="np-code-num-of-threads-4">
+<h3><span class="section-number">10.2.1. </span>Np code(Num. of threads=4)<a class="headerlink" href="#np-code-num-of-threads-4" title="Permalink to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">timeit</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">mkl</span> <span class="kn">import</span> <span class="n">set_num_threads</span><span class="p">,</span> <span class="n">get_max_threads</span>
+<span class="n">np</span><span class="o">.</span><span class="n">seterr</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+
+
+<span class="c1"># Used to randomly generate the initial positions of &quot;n&quot; particles.</span>
+<span class="c1"># not optimised objects and therefore identical to Py</span>
+
+<span class="k">def</span> <span class="nf">particle_initial_position</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">conflict</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+                <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">distance</span> <span class="o">&lt;=</span> <span class="mf">0.1</span><span class="p">:</span>
+                    <span class="n">conflict</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">conflict</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">p</span>
+
+
+
+<span class="c1"># main function,</span>
+<span class="c1"># &quot;n&quot; is the number of particles,</span>
+<span class="c1"># &quot;iterations&quot; is the total number of iterations (how many Δt are computed), </span>
+<span class="c1"># and &quot;show_plot&quot; controls whether or not to display the particle motion trajectories in the plot.</span>
+
+<span class="k">def</span> <span class="nf">simulate_np_4</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span><span class="n">show_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="c1">#    p = particle_initial_position(n)</span>
+    <span class="n">set_num_threads</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iterations</span><span class="p">):</span>
+        
+        <span class="c1"># Calculate the spacing of the particles.</span>
+        <span class="n">rvs</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span>    <span class="c1">#the distance between particles, vector.</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rvs</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>      <span class="c1">##the distance between particles, scalar.</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>  <span class="c1"># forces from all other particles</span>
+
+        <span class="n">dist_i</span> <span class="o">=</span> <span class="n">dist</span><span class="p">[:,</span> <span class="p">:]</span>
+        <span class="n">rvs_i</span> <span class="o">=</span> <span class="n">rvs</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:]</span>
+
+        <span class="c1"># Calculate the unit vector, i.e. the direction of force</span>
+        <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">):</span>
+            <span class="n">unit_vectors_nan</span> <span class="o">=</span> <span class="n">rvs_i</span> <span class="o">/</span> <span class="n">dist_i</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="n">unit_vectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">unit_vectors_nan</span><span class="p">)</span>
+
+        <span class="n">dist_new</span> <span class="o">=</span> <span class="n">dist_i</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        
+        <span class="c1"># Calculate the L-J potential force</span>
+        <span class="n">epsilon</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">):</span>
+            <span class="n">fs_nan</span> <span class="o">=</span> <span class="mi">48</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">dist_new</span><span class="p">,</span> <span class="mi">13</span><span class="p">)</span><span class="o">-</span><span class="mi">24</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">dist_new</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">fs_nan</span><span class="p">)</span><span class="o">*</span><span class="n">unit_vectors</span>
+                
+        <span class="c1"># Calculate the total force</span>
+        <span class="n">f_i</span> <span class="o">=</span> <span class="n">fs</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate the displacement, delta t is 0.00001.</span>
+        <span class="n">x_delta</span> <span class="o">=</span> <span class="n">f_i</span> <span class="o">/</span> <span class="mi">1</span> <span class="o">*</span> <span class="mf">0.00001</span>
+        
+        <span class="c1"># update position of particles</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">update_position</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">x_delta</span><span class="p">)</span>
+        
+        <span class="c1"># Plot</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">p</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="s1">&#39;orange&#39;</span><span class="p">]</span> 
+        <span class="k">if</span> <span class="n">show_plot</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_</span> <span class="o">%</span> <span class="mi">50</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">update_plot</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span><span class="n">colors</span><span class="p">)</span>
+                
+    <span class="c1"># plot finally result</span>
+<span class="c1">#    print(&quot;P({}): &quot;.format(iterations), p)</span>
+
+<span class="c1">#    return p</span>
+
+
+
+<span class="c1"># update the position of the particle.</span>
+<span class="c1"># &quot;delta_r&quot; is the displacement produced in Δt,</span>
+<span class="c1"># &quot;p&quot; is the position of the particle,</span>
+<span class="c1"># &quot;new_p&quot; is the position of the particle after the displacement has occurred</span>
+
+<span class="k">def</span> <span class="nf">update_position</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">delta_r</span><span class="p">):</span>
+    <span class="n">new_pos</span> <span class="o">=</span> <span class="n">p</span> <span class="o">+</span> <span class="n">delta_r</span>
+    <span class="k">return</span> <span class="n">new_pos</span>
+
+
+
+<span class="c1"># Plot</span>
+<span class="k">def</span> <span class="nf">update_plot</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span><span class="n">color</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+    <span class="n">xpos</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">ypos</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+    <span class="n">N_color</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xpos</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ypos</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="n">N_color</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">left</span><span class="o">=-</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">2.1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">bottom</span><span class="o">=-</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">2.1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.0001</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="execution-time-for-np-num-of-threads-4">
+<h3><span class="section-number">10.2.2. </span>Execution time for Np (Num. of threads=4)<a class="headerlink" href="#execution-time-for-np-num-of-threads-4" title="Permalink to this heading">#</a></h3>
+<p>Calculating execution time for numpy versions:</p>
+<p>(Execution time is “compute_time_np”)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">p</span> <span class="o">=</span> <span class="n">particle_initial_position</span><span class="p">(</span><span class="mi">250</span><span class="p">)</span>
+
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="n">simulate_np_4</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+
+<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">max_threads</span> <span class="o">=</span> <span class="n">get_max_threads</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;max threads：&quot;</span><span class="p">,</span> <span class="n">max_threads</span><span class="p">)</span>
+<span class="n">compute_time_np_4</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;simulate_np execution time_4:&quot;</span><span class="p">,</span> <span class="n">compute_time_np_4</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>max threads： 4
+simulate_np execution time_4: 11.439701557159424
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="np-code-num-of-threads-1">
+<h3><span class="section-number">10.2.3. </span>Np code (Num. of threads=1)<a class="headerlink" href="#np-code-num-of-threads-1" title="Permalink to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">timeit</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">mkl</span> <span class="kn">import</span> <span class="n">set_num_threads</span><span class="p">,</span> <span class="n">get_max_threads</span>
+<span class="n">np</span><span class="o">.</span><span class="n">seterr</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+
+
+<span class="c1"># Used to randomly generate the initial positions of &quot;n&quot; particles.</span>
+<span class="c1"># not optimised objects and therefore identical to Py</span>
+
+<span class="k">def</span> <span class="nf">particle_initial_position</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">conflict</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+                <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">distance</span> <span class="o">&lt;=</span> <span class="mf">0.1</span><span class="p">:</span>
+                    <span class="n">conflict</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">conflict</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">p</span>
+
+
+
+<span class="c1"># main function,</span>
+<span class="c1"># &quot;n&quot; is the number of particles,</span>
+<span class="c1"># &quot;iterations&quot; is the total number of iterations (how many Δt are computed), </span>
+<span class="c1"># and &quot;show_plot&quot; controls whether or not to display the particle motion trajectories in the plot.</span>
+
+<span class="k">def</span> <span class="nf">simulate_np_1</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span><span class="n">show_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="c1">#    p = particle_initial_position(n)</span>
+    <span class="n">set_num_threads</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iterations</span><span class="p">):</span>
+        
+        <span class="c1"># Calculate the spacing of the particles.</span>
+        <span class="n">rvs</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span>    <span class="c1">#the distance between particles, vector.</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rvs</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>      <span class="c1">##the distance between particles, scalar.</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>  <span class="c1"># forces from all other particles</span>
+
+        <span class="n">dist_i</span> <span class="o">=</span> <span class="n">dist</span><span class="p">[:,</span> <span class="p">:]</span>
+        <span class="n">rvs_i</span> <span class="o">=</span> <span class="n">rvs</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:]</span>
+
+        <span class="c1"># Calculate the unit vector, i.e. the direction of force</span>
+        <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">):</span>
+            <span class="n">unit_vectors_nan</span> <span class="o">=</span> <span class="n">rvs_i</span> <span class="o">/</span> <span class="n">dist_i</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="n">unit_vectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">unit_vectors_nan</span><span class="p">)</span>
+
+        <span class="n">dist_new</span> <span class="o">=</span> <span class="n">dist_i</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        
+        <span class="c1"># Calculate the L-J potential force</span>
+        <span class="n">epsilon</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">invalid</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">):</span>
+            <span class="n">fs_nan</span> <span class="o">=</span> <span class="mi">48</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">dist_new</span><span class="p">,</span> <span class="mi">13</span><span class="p">)</span><span class="o">-</span><span class="mi">24</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">dist_new</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">fs_nan</span><span class="p">)</span><span class="o">*</span><span class="n">unit_vectors</span>
+                
+        <span class="c1"># Calculate the total force</span>
+        <span class="n">f_i</span> <span class="o">=</span> <span class="n">fs</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate the displacement, delta t is 0.00001.</span>
+        <span class="n">x_delta</span> <span class="o">=</span> <span class="n">f_i</span> <span class="o">/</span> <span class="mi">1</span> <span class="o">*</span> <span class="mf">0.00001</span>
+        
+        <span class="c1"># update position of particles</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">update_position</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">x_delta</span><span class="p">)</span>
+        
+        <span class="c1"># Plot</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">p</span>
+        <span class="n">colors</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="s1">&#39;orange&#39;</span><span class="p">]</span> 
+        <span class="k">if</span> <span class="n">show_plot</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_</span> <span class="o">%</span> <span class="mi">50</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">update_plot</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span><span class="n">colors</span><span class="p">)</span>
+                
+    <span class="c1"># plot finally result</span>
+<span class="c1">#    print(&quot;P({}): &quot;.format(iterations), p)</span>
+
+
+<span class="c1">#    return p</span>
+
+
+
+<span class="c1"># update the position of the particle.</span>
+<span class="c1"># &quot;delta_r&quot; is the displacement produced in Δt,</span>
+<span class="c1"># &quot;p&quot; is the position of the particle,</span>
+<span class="c1"># &quot;new_p&quot; is the position of the particle after the displacement has occurred</span>
+
+<span class="k">def</span> <span class="nf">update_position</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">delta_r</span><span class="p">):</span>
+    <span class="n">new_pos</span> <span class="o">=</span> <span class="n">p</span> <span class="o">+</span> <span class="n">delta_r</span>
+    <span class="k">return</span> <span class="n">new_pos</span>
+
+
+
+<span class="c1"># Plot</span>
+<span class="k">def</span> <span class="nf">update_plot</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span><span class="n">color</span><span class="p">):</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">clf</span><span class="p">()</span>
+    <span class="n">xpos</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">ypos</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+    <span class="n">N_color</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xpos</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ypos</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="n">N_color</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="n">left</span><span class="o">=-</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">2.1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="n">bottom</span><span class="o">=-</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">2.1</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">pause</span><span class="p">(</span><span class="mf">0.0001</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="execution-time-for-np-num-of-threads-1">
+<h3><span class="section-number">10.2.4. </span>Execution time for Np (Num. of threads=1)<a class="headerlink" href="#execution-time-for-np-num-of-threads-1" title="Permalink to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">p</span> <span class="o">=</span> <span class="n">particle_initial_position</span><span class="p">(</span><span class="mi">250</span><span class="p">)</span>
+
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="n">simulate_np_1</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+
+<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">max_threads</span> <span class="o">=</span> <span class="n">get_max_threads</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;max threads：&quot;</span><span class="p">,</span> <span class="n">max_threads</span><span class="p">)</span>
+<span class="n">compute_time_np_1</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;simulate_np execution time_1:&quot;</span><span class="p">,</span> <span class="n">compute_time_np_1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>max threads： 1
+simulate_np execution time_1: 10.788192510604858
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="numba-nb">
+<h2><span class="section-number">10.3. </span>Numba (Nb)<a class="headerlink" href="#numba-nb" title="Permalink to this heading">#</a></h2>
+<p>Optimisation with Numba.</p>
+<section id="nb-code-num-of-threads-1">
+<h3><span class="section-number">10.3.1. </span>Nb code  (Num. of threads=1)<a class="headerlink" href="#nb-code-num-of-threads-1" title="Permalink to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numba</span> <span class="k">as</span> <span class="nn">nb</span>
+<span class="kn">import</span> <span class="nn">timeit</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+
+<span class="c1"># Used to randomly generate the initial positions of &quot;n&quot; particles.</span>
+<span class="c1"># not optimised objects and therefore identical to Py</span>
+<span class="k">def</span> <span class="nf">particle_initial_position</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">conflict</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+                <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">distance</span> <span class="o">&lt;=</span> <span class="mf">0.1</span><span class="p">:</span>
+                    <span class="n">conflict</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">conflict</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">p</span>
+
+
+
+<span class="c1"># main function,</span>
+<span class="c1"># &quot;n&quot; is the number of particles,</span>
+<span class="c1"># &quot;iterations&quot; is the total number of iterations (how many Δt are computed), </span>
+<span class="nd">@nb</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span> <span class="nf">simulate_nb_1</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">iterations</span><span class="p">):</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+    <span class="n">fs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">x_delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">epsilon</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.1</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iterations</span><span class="p">):</span>
+        <span class="n">fs</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
+                    <span class="c1"># Calculate the distant, vector.</span>
+                    <span class="n">x</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">pos</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pos</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                    
+                    <span class="c1"># Calculate the distant, scalar.</span>
+                    <span class="n">dist</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>
+                    
+                    <span class="c1"># Calculate the horizontal and vertical coordinates of the unit vector</span>
+                    <span class="n">ux</span> <span class="o">=</span> <span class="n">x</span> <span class="o">/</span> <span class="n">dist</span>
+                    <span class="n">uy</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">dist</span>
+                    
+                    <span class="c1"># Calculate the force, scalar.</span>
+                    <span class="n">force</span> <span class="o">=</span> <span class="mi">48</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">**</span> <span class="mi">12</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">dist</span> <span class="o">**</span> <span class="mi">13</span><span class="p">)</span> <span class="o">-</span> <span class="mi">24</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">**</span> <span class="mi">6</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">dist</span> <span class="o">**</span> <span class="mi">7</span><span class="p">)</span>
+                    
+                    <span class="c1"># Convert the force into vector and multiply it in advance by delta(0.00001).</span>
+                    <span class="n">factor</span> <span class="o">=</span> <span class="mf">0.00001</span>
+                    <span class="n">fs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="n">force</span> <span class="o">*</span> <span class="n">ux</span> <span class="o">*</span> <span class="n">factor</span>
+                    <span class="n">fs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="n">force</span> <span class="o">*</span> <span class="n">uy</span> <span class="o">*</span> <span class="n">factor</span>
+
+        <span class="c1"># Calculate the displacement.</span>
+        <span class="n">x_delta</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+                <span class="n">x_delta</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">fs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1.0</span>
+
+        <span class="c1"># update the position of particles.</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">update_position</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">x_delta</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pos</span>
+
+
+
+<span class="c1"># update the position of particles.</span>
+
+<span class="nd">@nb</span><span class="o">.</span><span class="n">jit</span>
+<span class="k">def</span> <span class="nf">update_position</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">delta_r</span><span class="p">,</span> <span class="n">minimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">maximum</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">new_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">delta_r</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">delta_r</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">new_pos</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="n">new_pos</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
+
+    <span class="k">return</span> <span class="n">new_pos</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="execution-time-for-nb-num-of-threads-1">
+<h3><span class="section-number">10.3.2. </span>Execution time for Nb  (Num. of threads=1)<a class="headerlink" href="#execution-time-for-nb-num-of-threads-1" title="Permalink to this heading">#</a></h3>
+<p>Calculating execution time for numba versions:</p>
+<p>(Execution time is “compute_time_nb_1”)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">p</span> <span class="o">=</span> <span class="n">particle_initial_position</span><span class="p">(</span><span class="mi">250</span><span class="p">)</span>
+
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="n">simulate_nb_1</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+
+<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">compute_time_nb_1</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;simulate_nb execution time_1:&quot;</span><span class="p">,</span> <span class="n">compute_time_nb_1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>simulate_nb execution time_1: 2.1452345848083496
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="nb-code-num-of-threads-4">
+<h3><span class="section-number">10.3.3. </span>Nb code  (Num. of threads=4)<a class="headerlink" href="#nb-code-num-of-threads-4" title="Permalink to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">timeit</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">numba</span> <span class="k">as</span> <span class="nn">nb</span>
+
+
+<span class="c1"># nb.config.NUMBA_NUM_THREADS = 4</span>
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="n">nb</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">NUMBA_DEFAULT_NUM_THREADS</span>
+
+<span class="c1"># Used to randomly generate the initial positions of &quot;n&quot; particles.</span>
+<span class="c1"># not optimised objects and therefore identical to Py</span>
+<span class="nd">@nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">particle_initial_position</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">nb</span><span class="o">.</span><span class="n">prange</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">conflict</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+                <span class="c1"># distance = np.linalg.norm(p[i] - p[j])</span>
+                <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">distance</span> <span class="o">&lt;=</span> <span class="mf">0.1</span><span class="p">:</span>
+                    <span class="n">conflict</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">conflict</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span>
+    <span class="k">return</span> <span class="n">p</span>
+
+
+
+<span class="c1"># main function,</span>
+<span class="c1"># &quot;n&quot; is the number of particles,</span>
+<span class="c1"># &quot;iterations&quot; is the total number of iterations (how many Δt are computed), </span>
+<span class="nd">@nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">simulate_nb_4</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">iterations</span><span class="p">):</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+    <span class="n">fs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">x_delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">pos</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">epsilon</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="mf">0.1</span>
+    <span class="n">test</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting the main for loop!&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">iterations</span><span class="p">):</span>
+        <span class="n">fs</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">nb</span><span class="o">.</span><span class="n">prange</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
+                    <span class="c1"># Calculate the distant, vector.</span>
+                    <span class="n">x</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">pos</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">pos</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="c1"># Calculate the distant, scalar.</span>
+                    <span class="n">dist</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">y</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>
+                    
+                    <span class="c1"># Calculate the horizontal and vertical coordinates of the unit vector</span>
+                    <span class="n">ux</span> <span class="o">=</span> <span class="n">x</span> <span class="o">/</span> <span class="n">dist</span>
+                    <span class="n">uy</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">dist</span>
+                    
+                    <span class="c1"># Calculate the force, scalar.</span>
+                    <span class="n">force</span> <span class="o">=</span> <span class="mi">48</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">**</span> <span class="mi">12</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">dist</span> <span class="o">**</span> <span class="mi">13</span><span class="p">)</span> <span class="o">-</span> <span class="mi">24</span> <span class="o">*</span> <span class="n">epsilon</span> <span class="o">*</span> <span class="p">(</span><span class="n">sigma</span> <span class="o">**</span> <span class="mi">6</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">dist</span> <span class="o">**</span> <span class="mi">7</span><span class="p">)</span>
+                    
+                    <span class="c1"># Convert the force into vector and multiply it in advance by delta(0.00001).</span>
+                    <span class="n">factor</span> <span class="o">=</span> <span class="mf">0.00001</span>
+                    <span class="n">fs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="n">force</span> <span class="o">*</span> <span class="n">ux</span> <span class="o">*</span> <span class="n">factor</span>
+                    <span class="n">fs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="n">force</span> <span class="o">*</span> <span class="n">uy</span> <span class="o">*</span> <span class="n">factor</span>
+
+        <span class="c1"># Calculate the displacement.</span>
+        <span class="n">x_delta</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">nb</span><span class="o">.</span><span class="n">prange</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">):</span>
+                <span class="n">x_delta</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">fs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">/</span> <span class="mf">1.0</span>
+
+        <span class="c1"># update the position of particles.</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="n">update_position</span><span class="p">(</span><span class="n">pos</span><span class="p">,</span> <span class="n">x_delta</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">pos</span>
+
+
+
+<span class="c1"># update the position of particles.</span>
+
+<span class="nd">@nb</span><span class="o">.</span><span class="n">njit</span><span class="p">(</span><span class="n">cache</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parallel</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">update_position</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">delta_r</span><span class="p">,</span> <span class="n">minimum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">maximum</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">new_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">nb</span><span class="o">.</span><span class="n">prange</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">delta_r</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">delta_r</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">new_pos</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="n">new_pos</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">y</span>
+
+    <span class="k">return</span> <span class="n">new_pos</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="execution-time-for-nb-num-of-threads-4">
+<h3><span class="section-number">10.3.4. </span>Execution time for Nb  (Num. of threads=4)<a class="headerlink" href="#execution-time-for-nb-num-of-threads-4" title="Permalink to this heading">#</a></h3>
+<p>Calculating execution time for numba versions:</p>
+<p>(Execution time is “compute_time_nb_4”)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nb</span><span class="o">.</span><span class="n">set_num_threads</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="n">p</span> <span class="o">=</span> <span class="n">particle_initial_position</span><span class="p">(</span><span class="mi">250</span><span class="p">)</span>
+
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="n">simulate_nb_4</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+
+<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">compute_time_nb_4</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;simulate_nb execution time_4:&quot;</span><span class="p">,</span> <span class="n">compute_time_nb_4</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Starting the main for loop!
+simulate_nb execution time_4: 0.44873714447021484
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="cython-cy">
+<h2><span class="section-number">10.4. </span>Cython (Cy)<a class="headerlink" href="#cython-cy" title="Permalink to this heading">#</a></h2>
+<p>Optimisation with Cython.</p>
+<section id="cy-code-num-of-threads-1">
+<h3><span class="section-number">10.4.1. </span>Cy code   (Num. of threads=1)<a class="headerlink" href="#cy-code-num-of-threads-1" title="Permalink to this heading">#</a></h3>
+<p>number of threads is 1 by default.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> cython
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="k">cython</span>
+
+import pyximport
+pyximport.install()
+
+import matplotlib.pyplot as plt
+import timeit
+import time
+import numpy as np
+cimport numpy as cnp
+
+
+# Used to randomly generate the initial positions of &quot;n&quot; particles.
+# not optimised objects and therefore identical to Py
+def particle_initial_position(n):
+    np.random.seed(0)
+    p = np.random.rand(n, 2) * 2
+    for i in range(n):
+        while True:
+            conflict = False
+            for j in range(i):
+                distance = np.linalg.norm(p[i] - p[j])
+                if distance &lt;= 0.1:
+                    conflict = True
+                    break
+            if not conflict:
+                break
+            p[i] = np.random.rand(2) * 2
+    return p
+
+
+
+# main function,
+# &quot;n&quot; is the number of particles,
+# &quot;iterations&quot; is the total number of iterations (how many Δt are computed).
+cimport cython
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+cpdef simulate_cy_1( cnp.ndarray[double, ndim=2] p, int iterations):
+#    cdef cnp.ndarray[double, ndim=2] p = particle_initial_position(n)    # position of particles
+    
+    cdef Py_ssize_t n = len(p)
+    
+    cdef cnp.ndarray[double, ndim=2] fs    # force, vector
+    cdef cnp.ndarray[double, ndim=1] r    # distance between paricles, vector
+    cdef double dist    # distance between paricles, scalar
+    cdef cnp.ndarray[double, ndim=1] unit_vector    # unit vector, the direction of force
+    cdef double epsilon = 1
+    cdef double sigma = 0.1
+    cdef double force    # force, scalar
+    cdef cnp.ndarray[double, ndim=2] x_delta    # displacement
+    cdef double[:,::1] pos    # new position of particles
+    cdef double x,y    # x-axis and y-axis
+
+    
+    for _ in range(iterations):
+        x_delta = fs = np.zeros(shape=(n, 2))
+        
+        for i in range(n):
+            for j in range(n):
+                if i != j:
+                    x = p[j,0] - p[i,0]
+                    y = p[j,1] - p[i,1]
+                    dist = (x**2+y**2)**0.5
+                    
+                    # unit vector is (ux,uy)
+                    ux = x / dist
+                    uy = y / dist
+                    force = 48 * epsilon * (sigma**12) / (dist**13) - 24 * epsilon * (sigma**6) / (dist**7)
+                    factor = 0.00001    # delta t
+                    fs[i,0] += -force * ux * factor
+                    fs[i,1] += -force * uy * factor
+
+        x_delta = np.zeros(shape=(n, 2))
+        for i in range(n):
+            for j in range(2):
+                x_delta[i, j] = fs[i, j] / 1
+
+        p = update_position(p, x_delta)
+        pos = p
+    
+#    return p
+
+
+
+cimport cython
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+cpdef update_position(cnp.ndarray[double, ndim=2] p, cnp.ndarray[double, ndim=2] delta_r):
+    cdef Py_ssize_t i
+    cdef cnp.ndarray[double, ndim=2] new_pos
+    cdef double x, y
+    cdef Py_ssize_t n = p.shape[0]
+
+    new_pos = np.empty_like(p, dtype=np.float64)
+    
+    for i in range(n):
+        x = p[i, 0] + delta_r[i, 0]
+        y = p[i, 1] + delta_r[i, 1]
+
+        new_pos[i, 0] = x
+        new_pos[i, 1] = y
+
+    return new_pos
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="execution-time-for-cy-num-of-threads-1">
+<h3><span class="section-number">10.4.2. </span>Execution time for Cy   (Num. of threads=1)<a class="headerlink" href="#execution-time-for-cy-num-of-threads-1" title="Permalink to this heading">#</a></h3>
+<p>Calculating execution time for cython versions (number of threads is 1):</p>
+<p>(Execution time is “compute_time_cy_1”)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">p</span> <span class="o">=</span> <span class="n">particle_initial_position</span><span class="p">(</span><span class="mi">250</span><span class="p">)</span>
+
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="n">simulate_cy_1</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+
+<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="n">compute_time_cy_1</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;simulate_cy execution time_1:&quot;</span><span class="p">,</span> <span class="n">compute_time_cy_1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>simulate_cy execution time_1: 16.532904386520386
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="cy-code-num-of-threads-4">
+<h3><span class="section-number">10.4.3. </span>Cy code   (Num. of threads=4)<a class="headerlink" href="#cy-code-num-of-threads-4" title="Permalink to this heading">#</a></h3>
+<p>number of threads is 4.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="k">cython</span> --force -c=/openmp
+
+import pyximport
+pyximport.install()
+
+import matplotlib.pyplot as plt
+import timeit
+import time
+import numpy as np
+cimport numpy as cnp
+cimport cython
+from cython.parallel import prange
+
+# Used to randomly generate the initial positions of &quot;n&quot; particles.
+# not optimised objects and therefore identical to Py
+def particle_initial_position(n):
+    np.random.seed(0)
+    p = np.random.rand(n, 2) * 2
+    for i in range(n):
+        while True:
+            conflict = False
+            for j in range(i):
+                distance = np.linalg.norm(p[i] - p[j])
+                if distance &lt;= 0.1:
+                    conflict = True
+                    break
+            if not conflict:
+                break
+            p[i] = np.random.rand(2) * 2
+    return p
+
+
+# main function,
+# &quot;n&quot; is the number of particles,
+# &quot;iterations&quot; is the total number of iterations (how many Δt are computed).
+cimport cython
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+cpdef simulate_cy_4(cnp.ndarray[double, ndim=2] p, int iterations):
+#    cdef cnp.ndarray[double, ndim=2] p = particle_initial_position(n)    # position of particles
+    cdef Py_ssize_t n = len(p)
+    
+    cdef cnp.ndarray[double, ndim=2] fs = np.zeros(shape=(n, 2))    # force, vector
+    cdef cnp.ndarray[double, ndim=2] x_delta = np.zeros(shape=(n, 2))    # displacement
+    cdef cnp.ndarray[double, ndim=2] pos = p.copy()    # new position of particles
+    cdef Py_ssize_t i, j
+    cdef double x, y, dist, ux, uy, force, factor
+    cdef double epsilon = 1
+    cdef double sigma = 0.1
+    
+    for _ in range(iterations):
+        fs[:, :] = 0.0
+
+        for i in prange(n, num_threads=4, nogil=True):
+            for j in range(n):
+                if i != j:
+                    x = pos[j, 0] - pos[i, 0]
+                    y = pos[j, 1] - pos[i, 1]
+                    dist = (x ** 2 + y ** 2) ** 0.5
+
+                    ux = x / dist
+                    uy = y / dist
+                    force = 48 * epsilon * (sigma ** 12) / (dist ** 13) - 24 * epsilon * (sigma ** 6) / (dist ** 7)
+                    factor = 0.00001
+                    fs[i, 0] += -force * ux * factor
+                    fs[i, 1] += -force * uy * factor
+
+        x_delta[:, :] = 0.0
+        for i in prange(n, num_threads=4, nogil=True):
+            for j in range(2):
+                x_delta[i, j] = fs[i, j] / 1.0
+
+        pos = update_position(pos, x_delta)
+    
+    return pos
+
+
+
+
+cimport cython
+@cython.boundscheck(False)
+@cython.wraparound(False)
+@cython.cdivision(True)
+cpdef update_position(cnp.ndarray[double, ndim=2] p, cnp.ndarray[double, ndim=2] delta_r):
+    cdef Py_ssize_t i
+    cdef cnp.ndarray[double, ndim=2] new_pos
+    cdef double x, y
+    cdef Py_ssize_t n = p.shape[0]
+
+    new_pos = np.empty_like(p, dtype=np.float64)
+    
+    for i in prange(n, num_threads=4, nogil=True):
+        x = p[i, 0] + delta_r[i, 0]
+        y = p[i, 1] + delta_r[i, 1]
+
+        new_pos[i, 0] = x
+        new_pos[i, 1] = y
+    return new_pos
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="execution-time-for-cy-num-of-threads-4">
+<h3><span class="section-number">10.4.4. </span>Execution time for Cy   (Num. of threads=4)<a class="headerlink" href="#execution-time-for-cy-num-of-threads-4" title="Permalink to this heading">#</a></h3>
+<p>Calculating execution time for cython versions (number of threads is 4):</p>
+<p>(Execution time is “compute_time_cy_threads_4”)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">p</span> <span class="o">=</span> <span class="n">particle_initial_position</span><span class="p">(</span><span class="mi">250</span><span class="p">)</span>
+
+<span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="n">simulate_cy_4</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+
+<span class="n">end_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="n">compute_time_cy_4</span> <span class="o">=</span> <span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;simulate_cy execution time_4:&quot;</span><span class="p">,</span> <span class="n">compute_time_cy_4</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>simulate_cy execution time_4: 5.352380275726318
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="c">
+<h2><span class="section-number">10.5. </span>C<a class="headerlink" href="#c" title="Permalink to this heading">#</a></h2>
+<p>Reconstructing particle motion models in C.</p>
+<section id="c-code-num-of-threads-1">
+<h3><span class="section-number">10.5.1. </span>C code  (Num. of threads=1)<a class="headerlink" href="#c-code-num-of-threads-1" title="Permalink to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%file</span> executiontime.c
+<span class="c1">#include &lt;stdio.h&gt;</span>
+<span class="c1">#include &lt;stdlib.h&gt;</span>
+<span class="c1">#include &lt;time.h&gt;</span>
+<span class="c1">#include &lt;math.h&gt;</span>
+
+<span class="c1">#define N 250       //Number of particles</span>
+<span class="c1">#define EPSILON 1.0    //Parameters in the potential energy equation</span>
+<span class="c1">#define SIGMA 0.1    //Parameters in the potential energy equation</span>
+<span class="c1">#define T_DELTA 0.00001</span>
+<span class="c1">#define ITERATIONS 1000</span>
+
+<span class="n">typedef</span> <span class="n">struct</span> <span class="p">{</span>
+    <span class="n">double</span> <span class="n">x</span><span class="p">;</span>
+    <span class="n">double</span> <span class="n">y</span><span class="p">;</span>
+<span class="p">}</span> <span class="n">Vector</span><span class="p">;</span>
+
+
+<span class="o">//</span><span class="n">Randomly</span> <span class="n">generate</span> <span class="n">the</span> <span class="n">initial</span> <span class="n">positions</span> <span class="n">of</span> <span class="n">the</span> <span class="n">particles</span> <span class="ow">and</span> <span class="n">ensure</span> <span class="n">that</span> <span class="n">the</span> <span class="n">distance</span> <span class="n">between</span> <span class="n">particles</span> <span class="ow">is</span> <span class="n">greater</span> <span class="n">than</span> <span class="mf">0.1</span><span class="o">.</span>
+<span class="n">void</span> <span class="n">initialize_particles</span><span class="p">(</span><span class="n">Vector</span> <span class="n">p</span><span class="p">[</span><span class="n">N</span><span class="p">])</span> <span class="p">{</span>
+    <span class="n">srand</span><span class="p">(</span><span class="n">time</span><span class="p">(</span><span class="n">NULL</span><span class="p">));</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="nb">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">double</span><span class="p">)</span><span class="n">rand</span><span class="p">()</span> <span class="o">/</span> <span class="n">RAND_MAX</span> <span class="o">*</span> <span class="mi">2</span><span class="p">;</span>
+        <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">double</span><span class="p">)</span><span class="n">rand</span><span class="p">()</span> <span class="o">/</span> <span class="n">RAND_MAX</span> <span class="o">*</span> <span class="mi">2</span><span class="p">;</span>
+
+        <span class="o">//</span> <span class="n">Ensure</span> <span class="n">that</span> <span class="n">the</span> <span class="n">spacing</span> <span class="n">between</span> <span class="n">particles</span> <span class="ow">is</span> <span class="n">greater</span> <span class="n">than</span> <span class="mf">0.1</span>
+        <span class="k">for</span> <span class="p">(</span><span class="nb">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">i</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">double</span> <span class="n">distance</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="nb">pow</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="nb">pow</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="mi">2</span><span class="p">));</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">distance</span> <span class="o">&lt;=</span> <span class="mf">0.1</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">i</span><span class="o">--</span><span class="p">;</span>  <span class="o">//</span> <span class="n">Regenerate</span> <span class="n">coordinates</span>
+                <span class="k">break</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+
+<span class="o">//</span> <span class="n">Calculate</span> <span class="n">the</span> <span class="n">force</span>
+<span class="n">void</span> <span class="n">calculate_force</span><span class="p">(</span><span class="n">Vector</span> <span class="n">p</span><span class="p">[</span><span class="n">N</span><span class="p">],</span> <span class="n">Vector</span> <span class="n">fs</span><span class="p">[</span><span class="n">N</span><span class="p">])</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="nb">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">fs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span>
+        <span class="n">fs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="nb">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="nb">int</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">)</span> <span class="p">{</span>
+                <span class="n">double</span> <span class="n">r_x</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">;</span>
+                <span class="n">double</span> <span class="n">r_y</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">y</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">;</span>
+                <span class="n">double</span> <span class="n">dist</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">r_x</span> <span class="o">*</span> <span class="n">r_x</span> <span class="o">+</span> <span class="n">r_y</span> <span class="o">*</span> <span class="n">r_y</span><span class="p">);</span>
+
+                <span class="n">double</span> <span class="n">unit_vector_x</span> <span class="o">=</span> <span class="n">r_x</span> <span class="o">/</span> <span class="n">dist</span><span class="p">;</span>
+                <span class="n">double</span> <span class="n">unit_vector_y</span> <span class="o">=</span> <span class="n">r_y</span> <span class="o">/</span> <span class="n">dist</span><span class="p">;</span>
+
+                <span class="n">double</span> <span class="n">force</span> <span class="o">=</span> <span class="mf">48.0</span> <span class="o">*</span> <span class="n">EPSILON</span> <span class="o">*</span> <span class="nb">pow</span><span class="p">(</span><span class="n">SIGMA</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span> <span class="o">/</span> <span class="nb">pow</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="mi">13</span><span class="p">)</span> <span class="o">-</span> <span class="mf">24.0</span> <span class="o">*</span> <span class="n">EPSILON</span> <span class="o">*</span> <span class="nb">pow</span><span class="p">(</span><span class="n">SIGMA</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span> <span class="o">/</span> <span class="nb">pow</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="mi">7</span><span class="p">);</span>
+
+                <span class="n">fs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">+=</span> <span class="o">-</span><span class="n">force</span> <span class="o">*</span> <span class="n">unit_vector_x</span><span class="p">;</span>
+                <span class="n">fs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">y</span> <span class="o">+=</span> <span class="o">-</span><span class="n">force</span> <span class="o">*</span> <span class="n">unit_vector_y</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+
+<span class="o">//</span> <span class="n">update</span> <span class="n">position</span> <span class="n">of</span> <span class="n">particles</span><span class="o">.</span>
+<span class="n">void</span> <span class="n">update_position</span><span class="p">(</span><span class="n">Vector</span> <span class="n">p</span><span class="p">[</span><span class="n">N</span><span class="p">],</span> <span class="n">Vector</span> <span class="n">delta_r</span><span class="p">[</span><span class="n">N</span><span class="p">])</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="nb">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">+=</span> <span class="n">delta_r</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">;</span>
+        <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">y</span> <span class="o">+=</span> <span class="n">delta_r</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+
+<span class="o">//</span> <span class="n">Print</span> <span class="n">result</span>
+<span class="n">void</span> <span class="n">print_positions</span><span class="p">(</span><span class="n">Vector</span> <span class="n">p</span><span class="p">[</span><span class="n">N</span><span class="p">])</span> <span class="p">{</span>
+    <span class="k">for</span> <span class="p">(</span><span class="nb">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s2">&quot;P(</span><span class="si">%d</span><span class="s2">): [</span><span class="si">%.8f</span><span class="s2">, </span><span class="si">%.8f</span><span class="s2">]</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">y</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+
+<span class="o">//</span> <span class="n">main</span> <span class="n">function</span><span class="p">,</span> <span class="n">call</span> <span class="n">other</span> <span class="n">functions</span><span class="o">.</span>
+<span class="nb">int</span> <span class="n">main</span><span class="p">(</span><span class="n">void</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">clock_t</span> <span class="n">start_time</span><span class="p">,</span> <span class="n">end_time</span><span class="p">;</span>
+    <span class="n">double</span> <span class="n">total_time</span><span class="p">;</span>
+
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">clock</span><span class="p">();</span>
+    <span class="n">Vector</span> <span class="n">p</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+    <span class="n">Vector</span> <span class="n">fs</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+    <span class="n">Vector</span> <span class="n">delta_r</span><span class="p">[</span><span class="n">N</span><span class="p">];</span>
+
+    <span class="n">initialize_particles</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="nb">int</span> <span class="nb">iter</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nb">iter</span> <span class="o">&lt;</span> <span class="n">ITERATIONS</span><span class="p">;</span> <span class="nb">iter</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="n">calculate_force</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">fs</span><span class="p">);</span>
+
+        <span class="k">for</span> <span class="p">(</span><span class="nb">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="n">delta_r</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">fs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">x</span> <span class="o">/</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">T_DELTA</span><span class="p">;</span>
+            <span class="n">delta_r</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">fs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">y</span> <span class="o">/</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">T_DELTA</span><span class="p">;</span>
+        <span class="p">}</span>
+
+        <span class="n">update_position</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">delta_r</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="n">end_time</span> <span class="o">=</span> <span class="n">clock</span><span class="p">();</span> 
+
+    <span class="n">total_time</span> <span class="o">=</span> <span class="p">(</span><span class="n">double</span><span class="p">)(</span><span class="n">end_time</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">)</span> <span class="o">/</span> <span class="n">CLOCKS_PER_SEC</span><span class="p">;</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s2">&quot;Code execution time:</span><span class="si">%f</span><span class="s2"> s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">total_time</span><span class="p">);</span>
+<span class="o">//</span>    <span class="n">print_positions</span><span class="p">(</span><span class="n">p</span><span class="p">);</span>
+
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Overwriting executiontime.c
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="execution-time-for-c-num-of-threads-1">
+<h3><span class="section-number">10.5.2. </span>Execution time for C (Num. of threads=1)<a class="headerlink" href="#execution-time-for-c-num-of-threads-1" title="Permalink to this heading">#</a></h3>
+<p>Calculating execution time for C versions:</p>
+<p>(Execution time is “simulate_c_execution_time_1”)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>gcc -Wall -pedantic -O3 -o executiontime executiontime.c
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">time</span>
+<span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="o">!</span>executiontime
+<span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="n">compute_time_c_1</span> <span class="o">=</span> <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Code execution time:9.601000 s
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="c-code-num-of-threads-4">
+<h3><span class="section-number">10.5.3. </span>C code  (Num. of threads=4)<a class="headerlink" href="#c-code-num-of-threads-4" title="Permalink to this heading">#</a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>%%file executiontime_4.c
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;windows.h&gt;
+#include &lt;time.h&gt;
+#include &lt;math.h&gt;
+
+#define N 250
+#define EPSILON 1.0
+#define SIGMA 0.1
+#define T_DELTA 0.00001
+#define ITERATIONS 1000
+#define NUM_THREADS 4 // 设置线程数量
+
+typedef struct {
+    double x;
+    double y;
+} Vector;
+
+// 添加全局变量以共享数据
+Vector p[N];
+Vector fs[N];
+Vector delta_r[N];
+CRITICAL_SECTION criticalSection; // 定义互斥锁
+
+void initialize_particles(Vector p[N]) {
+    srand(time(NULL));
+
+    for (int i = 0; i &lt; N; i++) {
+        p[i].x = (double)rand() / RAND_MAX * 2;
+        p[i].y = (double)rand() / RAND_MAX * 2;
+
+        for (int j = 0; j &lt; i; j++) {
+            double distance = sqrt(pow(p[j].x - p[i].x, 2) + pow(p[j].y - p[i].y, 2));
+            if (distance &lt;= 0.1) {
+                i--;
+                break;
+            }
+        }
+    }
+}
+
+void calculate_force(Vector p[N], Vector fs[N], int start, int end) {
+    for (int i = start; i &lt; end; i++) {
+        fs[i].x = 0.0;
+        fs[i].y = 0.0;
+    }
+
+    for (int i = start; i &lt; end; i++) {
+        for (int j = 0; j &lt; N; j++) {
+            if (i != j) {
+                double r_x = p[j].x - p[i].x;
+                double r_y = p[j].y - p[i].y;
+                double dist = sqrt(r_x * r_x + r_y * r_y);
+
+                double unit_vector_x = r_x / dist;
+                double unit_vector_y = r_y / dist;
+
+                double force = 48.0 * EPSILON * pow(SIGMA, 12) / pow(dist, 13) - 24.0 * EPSILON * pow(SIGMA, 6) / pow(dist, 7);
+
+                fs[i].x += -force * unit_vector_x;
+                fs[i].y += -force * unit_vector_y;
+            }
+        }
+    }
+}
+
+void update_position(Vector p[N], Vector delta_r[N], int start, int end) {
+    for (int i = start; i &lt; end; i++) {
+        p[i].x += delta_r[i].x;
+        p[i].y += delta_r[i].y;
+    }
+}
+
+// 线程函数
+DWORD WINAPI ThreadFunction(LPVOID lpParam) {
+    int thread_id = (int)lpParam;
+    int start, end;
+    int particles_per_thread = N / NUM_THREADS;
+    start = thread_id * particles_per_thread;
+    end = (thread_id == NUM_THREADS - 1) ? N : (start + particles_per_thread);
+
+    for (int iter = 0; iter &lt; ITERATIONS; iter++) {
+        calculate_force(p, fs, start, end);
+        
+        for (int i = start; i &lt; end; i++) {
+            delta_r[i].x = fs[i].x / 1 * T_DELTA;
+            delta_r[i].y = fs[i].y / 1 * T_DELTA;
+        }
+
+        // 同步更新粒子位置
+        EnterCriticalSection(&amp;criticalSection);
+        update_position(p, delta_r, start, end);
+        LeaveCriticalSection(&amp;criticalSection);
+    }
+
+    return 0;
+}
+
+int main(void) {
+    clock_t start_time, end_time;
+    double total_time;
+    HANDLE threads[NUM_THREADS];
+
+    // 初始化互斥锁
+    InitializeCriticalSection(&amp;criticalSection);
+
+    start_time = clock();
+    initialize_particles(p);
+
+    for (int i = 0; i &lt; NUM_THREADS; i++) {
+        threads[i] = CreateThread(NULL, 0, ThreadFunction, (LPVOID)i, 0, NULL);
+        if (threads[i] == NULL) {
+            fprintf(stderr, &quot;Error creating thread\n&quot;);
+            return 1;
+        }
+    }
+
+    // 等待线程完成
+    WaitForMultipleObjects(NUM_THREADS, threads, TRUE, INFINITE);
+
+    end_time = clock();
+
+    total_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
+
+    printf(&quot;Code execution time:%f s\n&quot;, total_time);
+
+    // 清理互斥锁
+    DeleteCriticalSection(&amp;criticalSection);
+
+    return 0;
+}
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Overwriting executiontime_4.c
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="execution-time-for-c-num-of-threads-4">
+<h3><span class="section-number">10.5.4. </span>Execution time for C (Num. of threads=4)<a class="headerlink" href="#execution-time-for-c-num-of-threads-4" title="Permalink to this heading">#</a></h3>
+<p>Calculating execution time for C versions:</p>
+<p>(Execution time is “simulate_c_execution_time_4”)</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>gcc -Wall -pedantic -O3 -o executiontime_4 executiontime_4.c
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">time</span>
+<span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="o">!</span>executiontime_4
+<span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+<span class="n">compute_time_c_4</span> <span class="o">=</span> <span class="n">t1</span> <span class="o">-</span> <span class="n">t0</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Code execution time:2.196000 s
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">compute_time_np_1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>10.788192510604858
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="performance-comparison">
+<h2><span class="section-number">10.6. </span>Performance-comparison<a class="headerlink" href="#performance-comparison" title="Permalink to this heading">#</a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">HTML</span>
+
+<span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;Methods&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;Python&#39;</span><span class="p">,</span> <span class="s1">&#39;Numpy&#39;</span><span class="p">,</span><span class="s1">&#39;Numpy&#39;</span><span class="p">,</span><span class="s1">&#39;Numba&#39;</span><span class="p">,</span> <span class="s1">&#39;Numba&#39;</span><span class="p">,</span><span class="s1">&#39;Cython&#39;</span><span class="p">,</span><span class="s1">&#39;Cython&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span><span class="s1">&#39;C&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;Number of thread&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span><span class="s1">&#39;4&#39;</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span><span class="s1">&#39;4&#39;</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span><span class="s1">&#39;4&#39;</span><span class="p">,</span><span class="s1">&#39;1&#39;</span><span class="p">,</span><span class="s1">&#39;4&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;Excution time(s)&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">compute_time_py</span><span class="p">,</span> <span class="n">compute_time_np_1</span><span class="p">,</span><span class="n">compute_time_np_4</span><span class="p">,</span> <span class="n">compute_time_nb_1</span><span class="p">,</span><span class="n">compute_time_nb_4</span><span class="p">,</span> <span class="n">compute_time_cy_1</span><span class="p">,</span> <span class="n">compute_time_cy_4</span><span class="p">,</span> <span class="n">compute_time_c_1</span><span class="p">,</span><span class="n">compute_time_c_4</span><span class="p">],</span>
+    <span class="s1">&#39;Speed up&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">compute_time_py</span><span class="o">/</span><span class="n">compute_time_np_1</span><span class="p">,</span> <span class="n">compute_time_py</span><span class="o">/</span><span class="n">compute_time_np_4</span><span class="p">,</span> <span class="n">compute_time_py</span><span class="o">/</span><span class="n">compute_time_nb_1</span><span class="p">,</span> <span class="n">compute_time_py</span><span class="o">/</span><span class="n">compute_time_nb_4</span><span class="p">,</span> <span class="n">compute_time_py</span><span class="o">/</span><span class="n">compute_time_cy_1</span><span class="p">,</span><span class="n">compute_time_py</span><span class="o">/</span><span class="n">compute_time_cy_4</span><span class="p">,</span><span class="n">compute_time_py</span><span class="o">/</span><span class="n">compute_time_c_1</span><span class="p">,</span><span class="n">compute_time_py</span><span class="o">/</span><span class="n">compute_time_c_4</span><span class="p">]</span>
+<span class="p">}</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># Creating style functions</span>
+<span class="k">def</span> <span class="nf">add_border</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s1">&#39;border: 1px solid black&#39;</span>
+
+<span class="c1"># Applying style functions to data boxes</span>
+<span class="n">styled_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">applymap</span><span class="p">(</span><span class="n">add_border</span><span class="p">)</span>
+
+<span class="c1"># Defining CSS styles</span>
+<span class="n">table_style</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s1">&#39;selector&#39;</span><span class="p">:</span> <span class="s1">&#39;table&#39;</span><span class="p">,</span> <span class="s1">&#39;props&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;border-collapse&#39;</span><span class="p">,</span> <span class="s1">&#39;collapse&#39;</span><span class="p">)]},</span>
+    <span class="p">{</span><span class="s1">&#39;selector&#39;</span><span class="p">:</span> <span class="s1">&#39;th, td&#39;</span><span class="p">,</span> <span class="s1">&#39;props&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;border&#39;</span><span class="p">,</span> <span class="s1">&#39;1px solid black&#39;</span><span class="p">)]}</span>
+<span class="p">]</span>
+
+<span class="c1"># Adding styles to stylised data boxes</span>
+<span class="n">styled_df</span><span class="o">.</span><span class="n">set_table_styles</span><span class="p">(</span><span class="n">table_style</span><span class="p">)</span>
+
+<span class="c1"># Displaying stylised data boxes in Jupyter Notebook</span>
+<span class="n">HTML</span><span class="p">(</span><span class="n">styled_df</span><span class="o">.</span><span class="n">to_html</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><style type="text/css">
+#T_a7aaa table {
+  border-collapse: collapse;
+}
+#T_a7aaa th {
+  border: 1px solid black;
+}
+#T_a7aaa  td {
+  border: 1px solid black;
+}
+#T_a7aaa_row0_col0, #T_a7aaa_row0_col1, #T_a7aaa_row0_col2, #T_a7aaa_row0_col3, #T_a7aaa_row1_col0, #T_a7aaa_row1_col1, #T_a7aaa_row1_col2, #T_a7aaa_row1_col3, #T_a7aaa_row2_col0, #T_a7aaa_row2_col1, #T_a7aaa_row2_col2, #T_a7aaa_row2_col3, #T_a7aaa_row3_col0, #T_a7aaa_row3_col1, #T_a7aaa_row3_col2, #T_a7aaa_row3_col3, #T_a7aaa_row4_col0, #T_a7aaa_row4_col1, #T_a7aaa_row4_col2, #T_a7aaa_row4_col3, #T_a7aaa_row5_col0, #T_a7aaa_row5_col1, #T_a7aaa_row5_col2, #T_a7aaa_row5_col3, #T_a7aaa_row6_col0, #T_a7aaa_row6_col1, #T_a7aaa_row6_col2, #T_a7aaa_row6_col3, #T_a7aaa_row7_col0, #T_a7aaa_row7_col1, #T_a7aaa_row7_col2, #T_a7aaa_row7_col3, #T_a7aaa_row8_col0, #T_a7aaa_row8_col1, #T_a7aaa_row8_col2, #T_a7aaa_row8_col3 {
+  border: 1px solid black;
+}
+</style>
+<table id="T_a7aaa">
+  <thead>
+    <tr>
+      <th class="blank level0" >&nbsp;</th>
+      <th id="T_a7aaa_level0_col0" class="col_heading level0 col0" >Methods</th>
+      <th id="T_a7aaa_level0_col1" class="col_heading level0 col1" >Number of thread</th>
+      <th id="T_a7aaa_level0_col2" class="col_heading level0 col2" >Excution time(s)</th>
+      <th id="T_a7aaa_level0_col3" class="col_heading level0 col3" >Speed up</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th id="T_a7aaa_level0_row0" class="row_heading level0 row0" >0</th>
+      <td id="T_a7aaa_row0_col0" class="data row0 col0" >Python</td>
+      <td id="T_a7aaa_row0_col1" class="data row0 col1" >1</td>
+      <td id="T_a7aaa_row0_col2" class="data row0 col2" >5597.128479</td>
+      <td id="T_a7aaa_row0_col3" class="data row0 col3" >1.000000</td>
+    </tr>
+    <tr>
+      <th id="T_a7aaa_level0_row1" class="row_heading level0 row1" >1</th>
+      <td id="T_a7aaa_row1_col0" class="data row1 col0" >Numpy</td>
+      <td id="T_a7aaa_row1_col1" class="data row1 col1" >1</td>
+      <td id="T_a7aaa_row1_col2" class="data row1 col2" >10.788193</td>
+      <td id="T_a7aaa_row1_col3" class="data row1 col3" >518.819855</td>
+    </tr>
+    <tr>
+      <th id="T_a7aaa_level0_row2" class="row_heading level0 row2" >2</th>
+      <td id="T_a7aaa_row2_col0" class="data row2 col0" >Numpy</td>
+      <td id="T_a7aaa_row2_col1" class="data row2 col1" >4</td>
+      <td id="T_a7aaa_row2_col2" class="data row2 col2" >11.439702</td>
+      <td id="T_a7aaa_row2_col3" class="data row2 col3" >489.272246</td>
+    </tr>
+    <tr>
+      <th id="T_a7aaa_level0_row3" class="row_heading level0 row3" >3</th>
+      <td id="T_a7aaa_row3_col0" class="data row3 col0" >Numba</td>
+      <td id="T_a7aaa_row3_col1" class="data row3 col1" >1</td>
+      <td id="T_a7aaa_row3_col2" class="data row3 col2" >2.145235</td>
+      <td id="T_a7aaa_row3_col3" class="data row3 col3" >2609.098566</td>
+    </tr>
+    <tr>
+      <th id="T_a7aaa_level0_row4" class="row_heading level0 row4" >4</th>
+      <td id="T_a7aaa_row4_col0" class="data row4 col0" >Numba</td>
+      <td id="T_a7aaa_row4_col1" class="data row4 col1" >4</td>
+      <td id="T_a7aaa_row4_col2" class="data row4 col2" >0.448737</td>
+      <td id="T_a7aaa_row4_col3" class="data row4 col3" >12473.067024</td>
+    </tr>
+    <tr>
+      <th id="T_a7aaa_level0_row5" class="row_heading level0 row5" >5</th>
+      <td id="T_a7aaa_row5_col0" class="data row5 col0" >Cython</td>
+      <td id="T_a7aaa_row5_col1" class="data row5 col1" >1</td>
+      <td id="T_a7aaa_row5_col2" class="data row5 col2" >16.532904</td>
+      <td id="T_a7aaa_row5_col3" class="data row5 col3" >338.544780</td>
+    </tr>
+    <tr>
+      <th id="T_a7aaa_level0_row6" class="row_heading level0 row6" >6</th>
+      <td id="T_a7aaa_row6_col0" class="data row6 col0" >Cython</td>
+      <td id="T_a7aaa_row6_col1" class="data row6 col1" >4</td>
+      <td id="T_a7aaa_row6_col2" class="data row6 col2" >5.352380</td>
+      <td id="T_a7aaa_row6_col3" class="data row6 col3" >1045.726983</td>
+    </tr>
+    <tr>
+      <th id="T_a7aaa_level0_row7" class="row_heading level0 row7" >7</th>
+      <td id="T_a7aaa_row7_col0" class="data row7 col0" >C</td>
+      <td id="T_a7aaa_row7_col1" class="data row7 col1" >1</td>
+      <td id="T_a7aaa_row7_col2" class="data row7 col2" >9.656067</td>
+      <td id="T_a7aaa_row7_col3" class="data row7 col3" >579.648892</td>
+    </tr>
+    <tr>
+      <th id="T_a7aaa_level0_row8" class="row_heading level0 row8" >8</th>
+      <td id="T_a7aaa_row8_col0" class="data row8 col0" >C</td>
+      <td id="T_a7aaa_row8_col1" class="data row8 col1" >4</td>
+      <td id="T_a7aaa_row8_col2" class="data row8 col2" >2.235951</td>
+      <td id="T_a7aaa_row8_col3" class="data row8 col3" >2503.242699</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="09_Methods%20of%20Inspection.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title"><span class="section-number">9. </span>Methods of Inspection</p>
+      </div>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#python-py">10.1. Python (Py)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#py-code">10.1.1. Py code</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plot-for-py">10.1.2. Plot for Py</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-py">10.1.3. Execution time for Py</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#numpy-np">10.2. Numpy (Np)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#np-code-num-of-threads-4">10.2.1. Np code(Num. of threads=4)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-np-num-of-threads-4">10.2.2. Execution time for Np (Num. of threads=4)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#np-code-num-of-threads-1">10.2.3. Np code (Num. of threads=1)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-np-num-of-threads-1">10.2.4. Execution time for Np (Num. of threads=1)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#numba-nb">10.3. Numba (Nb)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nb-code-num-of-threads-1">10.3.1. Nb code  (Num. of threads=1)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-nb-num-of-threads-1">10.3.2. Execution time for Nb  (Num. of threads=1)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nb-code-num-of-threads-4">10.3.3. Nb code  (Num. of threads=4)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-nb-num-of-threads-4">10.3.4. Execution time for Nb  (Num. of threads=4)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cython-cy">10.4. Cython (Cy)</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cy-code-num-of-threads-1">10.4.1. Cy code   (Num. of threads=1)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-cy-num-of-threads-1">10.4.2. Execution time for Cy   (Num. of threads=1)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cy-code-num-of-threads-4">10.4.3. Cy code   (Num. of threads=4)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-cy-num-of-threads-4">10.4.4. Execution time for Cy   (Num. of threads=4)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#c">10.5. C</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#c-code-num-of-threads-1">10.5.1. C code  (Num. of threads=1)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-c-num-of-threads-1">10.5.2. Execution time for C (Num. of threads=1)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#c-code-num-of-threads-4">10.5.3. C code  (Num. of threads=4)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#execution-time-for-c-num-of-threads-4">10.5.4. Execution time for C (Num. of threads=4)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-comparison">10.6. Performance-comparison</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Sen Liu
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2022.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

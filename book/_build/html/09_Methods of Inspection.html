@@ -64,7 +64,7 @@ const thebe_selector_output = ".output, .cell_output"
     <script>DOCUMENTATION_OPTIONS.pagename = '09_Methods of Inspection';</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="10. Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)" href="20_Performance-comparison_N250_Iteration1000.html" />
+    <link rel="next" title="10. Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)" href="21_Comparison.html" />
     <link rel="prev" title="8. Speed up 2D particles with Cython" href="08_Speed-up-2D-particles-with-Cython.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -166,7 +166,7 @@ const thebe_selector_output = ".output, .cell_output"
 <li class="toctree-l1"><a class="reference internal" href="07_Speed-up-Numpy-with-Cython.html">7. How to speed up Numpy with Cython</a></li>
 <li class="toctree-l1"><a class="reference internal" href="08_Speed-up-2D-particles-with-Cython.html">8. Speed up 2D particles with Cython</a></li>
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">9. Methods of Inspection</a></li>
-<li class="toctree-l1"><a class="reference internal" href="20_Performance-comparison_N250_Iteration1000.html">10. Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="21_Comparison.html">10. Performance comparison (Python &amp; Numpy &amp; Numba &amp; Cython &amp; C)</a></li>
 </ul>
 
     </div>
@@ -472,10 +472,10 @@ Line #      Hits         Time  Per Hit   % Time  Line Contents
 </section>
 <section id="view-check">
 <h2><span class="section-number">9.2. </span>View check<a class="headerlink" href="#view-check" title="Permalink to this heading">#</a></h2>
-<p>当创建一个数组的视图（view）时，它与原始数组共享相同的数据缓冲区。通常情况下，使用view更快，因为它避免了数据的复制和额外的内存分配。因此我们有检查view的必要。</p>
+<p>When creating a view of an array, it shares the same data buffer as the original array. Typically, using a view is faster as it avoids data copying and additional memory allocation. Hence, it’s necessary to perform a view check.</p>
 <section id="id1">
 <h3><span class="section-number">9.2.1. </span>Example<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h3>
-<p>我们首先创建一个数组C。</p>
+<p>Let’s start by creating an array C.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -494,7 +494,7 @@ Line #      Hits         Time  Per Hit   % Time  Line Contents
 </div>
 </div>
 </div>
-<p>使x等于C数组的第一行：</p>
+<p>Make x equal to the first row of the C array:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">x</span> <span class="o">=</span> <span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">,:]</span>
@@ -508,7 +508,7 @@ Line #      Hits         Time  Per Hit   % Time  Line Contents
 </div>
 </div>
 </div>
-<p>当我们改变数组的第一个元素时，x也会相应改变，因为x是view。</p>
+<p>When we change the first element of the array, x changes accordingly because x is view.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span>
@@ -537,7 +537,7 @@ Line #      Hits         Time  Per Hit   % Time  Line Contents
 </div>
 </div>
 </div>
-<p>比如下面这个例子，我们首先创建一个NumPy数组。</p>
+<p>For example, in the following example, we first create a NumPy array.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -548,7 +548,7 @@ Line #      Hits         Time  Per Hit   % Time  Line Contents
 </div>
 </div>
 </div>
-<p>接着计算平方根。这里我们计算一下运算时间。</p>
+<p>Next calculate the square root. Here we calculate the execution time.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
@@ -564,7 +564,7 @@ Line #      Hits         Time  Per Hit   % Time  Line Contents
 </div>
 </div>
 </div>
-<p>我们可以用<code class="docutils literal notranslate"><span class="pre">.base</span></code>来检查一下，data_np是不是view。</p>
+<p>We can use <code class="docutils literal notranslate"><span class="pre">.base</span></code> to check if data_np is a view.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">data_np</span><span class="o">.</span><span class="n">base</span><span class="p">)</span>
@@ -577,7 +577,7 @@ Line #      Hits         Time  Per Hit   % Time  Line Contents
 </div>
 </div>
 </div>
-<p>结果显示它并不是，因此这里我们可以为它创建一个视图，并重新计算平方和。</p>
+<p>The results show that it isn’t, so here we can create a view for it and recalculate the sum of squares.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
@@ -665,7 +665,7 @@ Timer unit: 1e-07 s
       </div>
     </a>
     <a class="right-next"
-       href="20_Performance-comparison_N250_Iteration1000.html"
+       href="21_Comparison.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
