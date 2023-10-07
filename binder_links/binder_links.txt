@@ -1,0 +1,10 @@
+chapters:
+  - file: content/page1.md
+    launch:
+      binderhub_url: "https://mybinder.org/v2/gh/Sen29/Optimisation-of-simulation-performance/HEAD"
+  - file: content/page2.md
+    launch:
+      binderhub_url: "https://mybinder.org/v2/gh/Sen29/Optimisation-of-simulation-performance/HEAD"
+  - file: content/page3.md
+    launch:
+      binderhub_url: "https://mybinder.org/v2/gh/Sen29/Optimisation-of-simulation-performance/HEAD"

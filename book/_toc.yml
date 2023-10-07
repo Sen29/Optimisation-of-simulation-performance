@@ -15,4 +15,4 @@ chapters:
 - file: 07_Speed-up-Numpy-with-Cython
 - file: 08_Speed-up-2D-particles-with-Cython
 - file: 09_Methods of Inspection
-- file: 20_Performance-comparison_N250_Iteration1000
+- file: 21_Comparison
